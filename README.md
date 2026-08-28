@@ -106,13 +106,19 @@ open MacBackup.xcodeproj
 - ターゲット: macOS 13 (Ventura) 以降 / Swift 5.9
 - 外部依存なし。Dropbox API v2 は `URLSession` + REST で直接呼んでいる
   （SwiftyDropbox は使っていない）
+- 共有スキーム `MacBackup` を追跡しているので、`xcodebuild -scheme MacBackup`
+  がそのまま使える
 - App Sandbox は有効。エンタイトルメントは
   ネットワーククライアント + ユーザー選択ファイルの読み書きのみ
+
+GitHub Actions（`.github/workflows/build.yml`）が、push と PR のたびに
+macOS ランナーで `xcodebuild` を流してビルドが通るか確認する。
+CI では署名しない（個人用のローカルビルドが前提のため）。
 
 ファイルを追加・削除したら、Xcode プロジェクトを作り直せる:
 
 ```sh
-python3 Scripts/generate_xcodeproj.py   # 同梱のジェネレーター
+python3 Scripts/generate_xcodeproj.py   # 同梱のジェネレーター（共有スキームも作る）
 # または
 xcodegen generate                        # project.yml から生成（XcodeGen 使用時）
 ```

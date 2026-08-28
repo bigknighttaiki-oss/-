@@ -25,6 +25,94 @@ def oid(*parts):
     return digest[:24].upper()
 
 
+SCHEME_TEMPLATE = """<?xml version="1.0" encoding="UTF-8"?>
+<Scheme
+   LastUpgradeVersion = "1500"
+   version = "1.7">
+   <BuildAction
+      parallelizeBuildables = "YES"
+      buildImplicitDependencies = "YES">
+      <BuildActionEntries>
+         <BuildActionEntry
+            buildForTesting = "YES"
+            buildForRunning = "YES"
+            buildForProfiling = "YES"
+            buildForArchiving = "YES"
+            buildForAnalyzing = "YES">
+            {reference}
+         </BuildActionEntry>
+      </BuildActionEntries>
+   </BuildAction>
+   <TestAction
+      buildConfiguration = "Debug"
+      selectedDebuggerIdentifier = "Xcode.DebuggerFoundation.Debugger.LLDB"
+      selectedLauncherIdentifier = "Xcode.DebuggerFoundation.Launcher.LLDB"
+      shouldUseLaunchSchemeArgsEnv = "YES">
+      <Testables>
+      </Testables>
+   </TestAction>
+   <LaunchAction
+      buildConfiguration = "Debug"
+      selectedDebuggerIdentifier = "Xcode.DebuggerFoundation.Debugger.LLDB"
+      selectedLauncherIdentifier = "Xcode.DebuggerFoundation.Launcher.LLDB"
+      launchStyle = "0"
+      useCustomWorkingDirectory = "NO"
+      ignoresPersistentStateOnLaunch = "NO"
+      debugDocumentVersioning = "YES"
+      debugServiceExtension = "internal"
+      allowLocationSimulation = "YES">
+      <BuildableProductRunnable
+         runnableDebuggingMode = "0">
+         {reference}
+      </BuildableProductRunnable>
+   </LaunchAction>
+   <ProfileAction
+      buildConfiguration = "Release"
+      shouldUseLaunchSchemeArgsEnv = "YES"
+      savedToolIdentifier = ""
+      useCustomWorkingDirectory = "NO"
+      debugDocumentVersioning = "YES">
+      <BuildableProductRunnable
+         runnableDebuggingMode = "0">
+         {reference}
+      </BuildableProductRunnable>
+   </ProfileAction>
+   <AnalyzeAction
+      buildConfiguration = "Debug">
+   </AnalyzeAction>
+   <ArchiveAction
+      buildConfiguration = "Release"
+      revealArchiveInOrganizer = "YES">
+   </ArchiveAction>
+</Scheme>
+"""
+
+
+def write_scheme(out_dir, target_id):
+    """共有スキームを書き出す。
+
+    スキームが無いと `xcodebuild -scheme` が使えず、CI でビルドできない。
+    Xcode がローカルに作るスキームはユーザー固有で共有されないため、
+    プロジェクトと一緒に生成して追跡する。
+    """
+    reference = (
+        '<BuildableReference\n'
+        '               BuildableIdentifier = "primary"\n'
+        f'               BlueprintIdentifier = "{target_id}"\n'
+        f'               BuildableName = "{PROJECT_NAME}.app"\n'
+        f'               BlueprintName = "{PROJECT_NAME}"\n'
+        f'               ReferencedContainer = "container:{PROJECT_NAME}.xcodeproj">\n'
+        '            </BuildableReference>'
+    )
+    scheme_dir = os.path.join(out_dir, "xcshareddata", "xcschemes")
+    os.makedirs(scheme_dir, exist_ok=True)
+    path = os.path.join(scheme_dir, f"{PROJECT_NAME}.xcscheme")
+    with open(path, "w", encoding="utf-8") as handle:
+        handle.write(SCHEME_TEMPLATE.format(reference=reference))
+    return path
+
+
+
 def collect():
     """ソースツリーを走査して {ディレクトリ: [ファイル]} を返す。"""
     tree = {}
@@ -314,7 +402,9 @@ def main():
     os.makedirs(out_dir, exist_ok=True)
     with open(os.path.join(out_dir, "project.pbxproj"), "w", encoding="utf-8") as handle:
         handle.write("\n".join(lines) + "\n")
+    scheme_path = write_scheme(out_dir, target_id)
     print(f"生成しました: {out_dir}/project.pbxproj ({len(swift_files)} Swift files)")
+    print(f"生成しました: {scheme_path}")
 
 
 if __name__ == "__main__":

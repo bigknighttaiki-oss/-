@@ -1,0 +1,49 @@
+name: ビルド
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+  workflow_dispatch:
+
+concurrency:
+  group: build-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  build:
+    name: xcodebuild (macOS)
+    runs-on: macos-14
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Xcode のバージョン
+        run: xcodebuild -version
+
+      - name: Xcode プロジェクトが最新か確認
+        # ソースを足したのにジェネレーターを流し忘れると、
+        # ビルド対象から漏れて気付けないので、ここで検出する。
+        run: |
+          python3 Scripts/generate_xcodeproj.py
+          if ! git diff --quiet -- MacBackup.xcodeproj; then
+            echo "::error::MacBackup.xcodeproj が生成結果と一致しません。"
+            echo "python3 Scripts/generate_xcodeproj.py を実行して、差分をコミットしてください。"
+            git diff --stat -- MacBackup.xcodeproj
+            exit 1
+          fi
+
+      - name: ビルド
+        # 個人用のローカルビルドが前提なので、CI では署名しない。
+        run: |
+          set -o pipefail
+          xcodebuild build \
+            -project MacBackup.xcodeproj \
+            -scheme MacBackup \
+            -configuration Debug \
+            -destination 'platform=macOS' \
+            CODE_SIGNING_ALLOWED=NO \
+            CODE_SIGNING_REQUIRED=NO \
+            CODE_SIGN_IDENTITY="" \
+            CODE_SIGN_ENTITLEMENTS="" \
+            DEVELOPMENT_TEAM=""
