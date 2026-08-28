@@ -121,9 +121,13 @@ final class BackupCoordinator: ObservableObject {
             let metadata = try await client.upload(
                 fileURL: item.url,
                 remoteFolder: remoteFolder,
-                progress: { [weak self] value in
+                // このクロージャはアップロード中だけ生きる。メインアクター隔離された
+                // 自分自身は Sendable なので、不変の強参照で捕まえる
+                // （弱参照だと、さらに内側の Task から捕捉変数を参照する形になり
+                // 並行実行中のコードから可変の捕捉を触ることになってコンパイルできない）。
+                progress: { [self] value in
                     Task { @MainActor in
-                        self?.update(itemID) { $0.status = .uploading(progress: value) }
+                        self.update(itemID) { $0.status = .uploading(progress: value) }
                     }
                 }
             )

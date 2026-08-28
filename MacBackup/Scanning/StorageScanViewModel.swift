@@ -46,14 +46,17 @@ final class StorageScanViewModel: ObservableObject {
         lastRoot = root
         state = .scanning(StorageScanner.Progress(currentPath: root.path))
 
-        var options = StorageScanner.Options.default
-        options.includesHiddenFiles = includesHiddenFiles
+        // 並行実行されるクロージャに渡すので、可変の var ではなく let で組み立てる。
+        let options = StorageScanner.Options(includesHiddenFiles: includesHiddenFiles)
 
-        scanTask = Task { [weak self] in
+        // メインアクター隔離された自分自身は Sendable なので、不変の強参照で捕まえる。
+        // 弱参照にすると、内側の Task が捕捉変数を参照する形になりコンパイルできない。
+        // タスクは終了時に解放されるので、参照が残り続けることはない。
+        scanTask = Task { [self] in
             // 途中経過はバックグラウンドから届くので、メインアクターに載せ替える。
             let update: @Sendable (StorageScanner.Progress) -> Void = { progress in
-                Task { @MainActor [weak self] in
-                    guard let self, self.isScanning else { return }
+                Task { @MainActor in
+                    guard self.isScanning else { return }
                     self.state = .scanning(progress)
                 }
             }
@@ -69,17 +72,16 @@ final class StorageScanViewModel: ObservableObject {
                 } onCancel: {
                     work.cancel()
                 }
-                guard let self, !Task.isCancelled else { return }
+                guard !Task.isCancelled else { return }
                 self.state = .finished(result)
             } catch {
-                guard let self else { return }
                 if error is CancellationError || (error as? StorageScanner.ScanError) == .cancelled {
                     self.state = .idle
                 } else if !Task.isCancelled {
                     self.state = .failed(error.localizedDescription)
                 }
             }
-            self?.scanTask = nil
+            self.scanTask = nil
         }
     }
 
