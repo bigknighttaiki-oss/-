@@ -5,48 +5,115 @@ struct UploadProgressView: View {
     @EnvironmentObject private var coordinator: BackupCoordinator
 
     var body: some View {
-        VStack(alignment: .leading, spacing: 16) {
-            VStack(alignment: .leading, spacing: 6) {
-                Text("全体の進捗")
-                    .font(.headline)
-                ProgressView(value: coordinator.overallProgress)
-                Text("\(finishedCount) / \(coordinator.items.count) ファイル")
-                    .font(.caption)
-                    .foregroundStyle(.secondary)
-            }
+        VStack(alignment: .leading, spacing: Metrics.block) {
+            overallCard
+            currentCard
+            queueCard
+        }
+        .padding(Metrics.gutter)
+        .frame(maxWidth: .infinity, maxHeight: .infinity, alignment: .top)
+    }
 
-            if let current = coordinator.currentItem {
-                VStack(alignment: .leading, spacing: 6) {
-                    Text(current.fileName)
-                        .font(.subheadline)
-                        .lineLimit(1)
-                        .truncationMode(.middle)
-                    ProgressView(value: current.status.progress)
-                    Text("\(ByteFormatting.string(current.byteSize)) · \(Int(current.status.progress * 100))%")
-                        .font(.caption)
-                        .foregroundStyle(.secondary)
-                }
-            }
+    // MARK: - 全体の進捗
 
-            List(coordinator.items) { item in
-                HStack {
-                    Image(systemName: item.category.symbolName)
-                        .foregroundStyle(.secondary)
-                    Text(item.fileName)
-                        .lineLimit(1)
-                        .truncationMode(.middle)
+    private var overallCard: some View {
+        Card {
+            VStack(alignment: .leading, spacing: Metrics.stack) {
+                HStack(alignment: .firstTextBaseline) {
+                    Text("アップロード中")
+                        .font(.headline)
                     Spacer()
-                    StatusLabel(status: item.status)
+                    Text("\(Int((coordinator.overallProgress * 100).rounded()))%")
+                        .font(.system(size: 30, weight: .semibold, design: .rounded))
+                        .monospacedDigit()
                 }
-            }
-            .frame(maxHeight: .infinity)
 
-            HStack {
-                Spacer()
-                Button("中断", role: .cancel) { coordinator.cancel() }
+                ProgressView(value: coordinator.overallProgress)
+                    .progressViewStyle(.linear)
+
+                HStack {
+                    Text("\(finishedCount) / \(coordinator.items.count) ファイル")
+                    Spacer()
+                    Text("残り \(coordinator.items.count - finishedCount) 件")
+                }
+                .font(.caption)
+                .monospacedDigit()
+                .foregroundStyle(.secondary)
             }
         }
-        .padding()
+    }
+
+    // MARK: - 送信中のファイル
+
+    @ViewBuilder
+    private var currentCard: some View {
+        if let current = coordinator.currentItem {
+            Card {
+                VStack(alignment: .leading, spacing: Metrics.stack) {
+                    HStack(spacing: Metrics.stack) {
+                        Image(systemName: current.category.symbolName)
+                            .symbolRenderingMode(.hierarchical)
+                            .foregroundStyle(current.category.chartColor)
+                            .font(.system(size: 20))
+
+                        VStack(alignment: .leading, spacing: 2) {
+                            Text(current.fileName)
+                                .lineLimit(1)
+                                .truncationMode(.middle)
+                            MonoText(
+                                "\(ByteFormatting.string(current.byteSize)) · \(Int((current.status.progress * 100).rounded()))%",
+                                font: .caption
+                            )
+                        }
+                        Spacer(minLength: 0)
+                    }
+
+                    ProgressView(value: current.status.progress)
+                        .progressViewStyle(.linear)
+                }
+            }
+        }
+    }
+
+    // MARK: - 待ち行列
+
+    private var queueCard: some View {
+        Card(padding: 0) {
+            VStack(alignment: .leading, spacing: 0) {
+                SectionHeader("ファイル", subtitle: "上から順に送ります")
+                    .padding(.horizontal, Metrics.cardPadding)
+                    .padding(.top, Metrics.cardPadding)
+                    .padding(.bottom, Metrics.tight)
+
+                ScrollView {
+                    LazyVStack(spacing: 0) {
+                        ForEach(coordinator.items) { item in
+                            FileRow(
+                                systemImage: item.category.symbolName,
+                                name: item.fileName,
+                                symbolTint: item.category.chartColor
+                            ) {
+                                UploadStatusLabel(status: item.status)
+                            }
+                            .padding(.horizontal, Metrics.cardPadding)
+
+                            if item.id != coordinator.items.last?.id {
+                                RowDivider().padding(.leading, Metrics.cardPadding + 30)
+                            }
+                        }
+                    }
+                }
+                .frame(maxHeight: 220)
+
+                RowDivider()
+
+                HStack {
+                    Spacer()
+                    Button("中断", role: .cancel) { coordinator.cancel() }
+                }
+                .padding(Metrics.cardPadding)
+            }
+        }
     }
 
     private var finishedCount: Int {
@@ -54,27 +121,33 @@ struct UploadProgressView: View {
     }
 }
 
-struct StatusLabel: View {
+/// 1 ファイルの状態表示。色に加えて記号か数値でも状態が分かるようにする。
+struct UploadStatusLabel: View {
     let status: BackupItem.Status
 
     var body: some View {
         switch status {
         case .pending:
-            Text("待機中").font(.caption).foregroundStyle(.secondary)
+            Text("待機中")
+                .font(.caption)
+                .foregroundStyle(.tertiary)
         case .uploading(let progress):
-            Text("\(Int(progress * 100))%").font(.caption).monospacedDigit()
+            HStack(spacing: 7) {
+                ProgressView(value: progress)
+                    .progressViewStyle(.linear)
+                    .frame(width: 68)
+                Text("\(Int((progress * 100).rounded()))%")
+                    .font(.caption)
+                    .monospacedDigit()
+                    .foregroundStyle(.secondary)
+                    .frame(width: 34, alignment: .trailing)
+            }
         case .succeeded:
-            Label("完了", systemImage: "checkmark.circle.fill")
-                .labelStyle(.iconOnly)
-                .foregroundStyle(.green)
+            StatusChip(text: "完了", systemImage: "checkmark.circle.fill", tint: .green)
         case .failed:
-            Label("失敗", systemImage: "exclamationmark.triangle.fill")
-                .labelStyle(.iconOnly)
-                .foregroundStyle(.red)
+            StatusChip(text: "失敗", systemImage: "exclamationmark.triangle.fill", tint: .red)
         case .skipped:
-            Label("スキップ", systemImage: "forward.end.alt.fill")
-                .labelStyle(.iconOnly)
-                .foregroundStyle(.orange)
+            StatusChip(text: "スキップ", systemImage: "forward.end.alt.fill", tint: .orange)
         }
     }
 }

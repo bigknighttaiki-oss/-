@@ -18,9 +18,8 @@ struct CategoryShareChart: View {
     }
 
     var body: some View {
-        VStack(alignment: .leading, spacing: 8) {
-            Text("種別ごとの割合")
-                .font(.headline)
+        VStack(alignment: .leading, spacing: Metrics.stack) {
+            SectionHeader("種別ごとの割合")
 
             if #available(macOS 14.0, *) {
                 donut
@@ -71,7 +70,7 @@ struct CategoryShareChart: View {
     private var centerLabel: some View {
         VStack(spacing: 2) {
             Text(ByteFormatting.string(usages.reduce(Int64(0)) { $0 + $1.byteSize }))
-                .font(.title2.bold())
+                .font(.system(size: 19, weight: .semibold, design: .rounded))
                 .monospacedDigit()
             Text("合計")
                 .font(.caption)
@@ -92,9 +91,8 @@ struct CategorySizeChart: View {
     }
 
     var body: some View {
-        VStack(alignment: .leading, spacing: 8) {
-            Text("種別ごとの使用容量")
-                .font(.headline)
+        VStack(alignment: .leading, spacing: Metrics.stack) {
+            SectionHeader("種別ごとの使用容量")
 
             Chart(sorted) { usage in
                 BarMark(
@@ -140,10 +138,7 @@ struct VolumeCapacityBar: View {
 
     var body: some View {
         VStack(alignment: .leading, spacing: 6) {
-            HStack(alignment: .firstTextBaseline) {
-                Text("ディスクの空き")
-                    .font(.headline)
-                Spacer()
+            SectionHeader(title: "ディスクの空き") {
                 Text("\(ByteFormatting.string(volume.availableBytes)) 空き / 全体 \(ByteFormatting.string(volume.totalBytes))")
                     .font(.callout)
                     .monospacedDigit()
@@ -153,10 +148,10 @@ struct VolumeCapacityBar: View {
             GeometryReader { geometry in
                 let usedWidth = geometry.size.width * CGFloat(min(1, max(0, volume.usedShare)))
                 ZStack(alignment: .leading) {
-                    RoundedRectangle(cornerRadius: 4)
+                    RoundedRectangle(cornerRadius: 4, style: .continuous)
                         .fill(Color(nsColor: .quaternaryLabelColor))
-                    RoundedRectangle(cornerRadius: 4)
-                        .fill(Color(nsColor: NSColor(rgbHex: 0x2A78D6)))
+                    RoundedRectangle(cornerRadius: 4, style: .continuous)
+                        .fill(FileCategory.photo.chartColor)
                         .frame(width: usedWidth)
                 }
             }
@@ -183,44 +178,50 @@ struct CategoryLegendTable: View {
 
     var body: some View {
         VStack(alignment: .leading, spacing: 0) {
-            HStack {
-                Text("種別").frame(width: 120, alignment: .leading)
-                Text("容量").frame(width: 90, alignment: .trailing)
-                Text("割合").frame(width: 60, alignment: .trailing)
-                Text("件数").frame(width: 80, alignment: .trailing)
-                Spacer()
+            HStack(spacing: 0) {
+                Text("種別").frame(width: 130, alignment: .leading)
+                Text("容量").frame(width: 92, alignment: .trailing)
+                Text("割合").frame(width: 62, alignment: .trailing)
+                Text("件数").frame(width: 88, alignment: .trailing)
+                Spacer(minLength: 0)
             }
-            .font(.caption.bold())
+            .font(.caption.weight(.semibold))
             .foregroundStyle(.secondary)
-            .padding(.vertical, 4)
+            .padding(.vertical, 5)
 
-            Divider()
+            RowDivider()
 
             ForEach(rows) { usage in
-                HStack {
-                    HStack(spacing: 6) {
-                        RoundedRectangle(cornerRadius: 2)
+                HStack(spacing: 0) {
+                    HStack(spacing: 7) {
+                        RoundedRectangle(cornerRadius: 3, style: .continuous)
                             .fill(usage.category.chartColor)
-                            .frame(width: 10, height: 10)
+                            .frame(width: 11, height: 11)
                         Image(systemName: usage.category.symbolName)
+                            .symbolRenderingMode(.hierarchical)
                             .foregroundStyle(.secondary)
                             .font(.caption)
                         Text(usage.category.displayName)
                     }
-                    .frame(width: 120, alignment: .leading)
+                    .frame(width: 130, alignment: .leading)
 
                     Text(ByteFormatting.string(usage.byteSize))
-                        .frame(width: 90, alignment: .trailing)
+                        .frame(width: 92, alignment: .trailing)
                     Text("\(Int((usage.share * 100).rounded()))%")
-                        .frame(width: 60, alignment: .trailing)
+                        .frame(width: 62, alignment: .trailing)
                     Text("\(usage.fileCount)")
-                        .frame(width: 80, alignment: .trailing)
-                    Spacer()
+                        .frame(width: 88, alignment: .trailing)
+                        .foregroundStyle(.secondary)
+                    Spacer(minLength: 0)
                 }
-                .monospacedDigit()
                 .font(.callout)
-                .padding(.vertical, 3)
-                .background(highlighted == usage.category ? Color.accentColor.opacity(0.12) : Color.clear)
+                .monospacedDigit()
+                .padding(.vertical, 5)
+                .padding(.horizontal, 6)
+                .background(
+                    RoundedRectangle(cornerRadius: Metrics.controlRadius, style: .continuous)
+                        .fill(highlighted == usage.category ? Color.accentColor.opacity(0.12) : Color.clear)
+                )
                 .contentShape(Rectangle())
                 .onHover { isHovering in
                     highlighted = isHovering ? usage.category : nil

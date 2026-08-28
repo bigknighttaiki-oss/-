@@ -11,92 +11,127 @@ struct SettingsView: View {
     @State private var accountEmail: String?
 
     var body: some View {
-        VStack(alignment: .leading, spacing: 16) {
+        VStack(alignment: .leading, spacing: Metrics.block) {
             Text("設定")
-                .font(.title2.bold())
+                .font(.title2.weight(.semibold))
 
-            GroupBox("Dropbox 連携") {
-                VStack(alignment: .leading, spacing: 10) {
-                    HStack {
-                        ConnectionBadge(state: auth.state)
-                        Spacer()
-                    }
-                    if let accountEmail {
-                        Text("アカウント: \(accountEmail)")
-                            .font(.callout)
-                            .foregroundStyle(.secondary)
-                    }
-                    if case .needsReauthentication(let reason) = auth.state {
-                        Text(reason)
-                            .font(.callout)
-                            .foregroundStyle(.orange)
-                            .fixedSize(horizontal: false, vertical: true)
-                    }
-                    if case .notConfigured = auth.state {
-                        appKeyInstructions
-                    }
-                    HStack {
-                        Button("再認証") { Task { await signIn() } }
-                            .disabled(auth.state == .notConfigured)
-                        Button("サインアウト") { auth.signOut(); accountEmail = nil }
-                            .disabled(!auth.state.isSignedIn)
-                    }
-                }
-                .padding(6)
-                .frame(maxWidth: .infinity, alignment: .leading)
-            }
-
-            GroupBox("アップロード先") {
-                VStack(alignment: .leading, spacing: 8) {
-                    HStack {
-                        Text("フォルダ")
-                        // フェーズ1では固定。将来ここを編集可能にする。
-                        TextField("", text: .constant(coordinator.remoteFolder))
-                            .textFieldStyle(.roundedBorder)
-                            .disabled(true)
-                    }
-                    Text("フェーズ1ではアップロード先は \(AppConfig.defaultRemoteFolder)/ に固定されています。")
-                        .font(.caption)
-                        .foregroundStyle(.secondary)
-                }
-                .padding(6)
-                .frame(maxWidth: .infinity, alignment: .leading)
-            }
+            connectionCard
+            destinationCard
 
             if let errorMessage {
-                Text(errorMessage)
+                Label(errorMessage, systemImage: "exclamationmark.triangle.fill")
                     .font(.callout)
                     .foregroundStyle(.red)
                     .fixedSize(horizontal: false, vertical: true)
             }
 
-            Spacer()
+            Spacer(minLength: 0)
+
             HStack {
                 Spacer()
                 Button("閉じる") { dismiss() }
+                    .buttonStyle(.borderedProminent)
                     .keyboardShortcut(.defaultAction)
             }
         }
-        .padding()
-        .frame(width: 520, height: 460)
+        .padding(Metrics.gutter)
+        .frame(width: 560, height: 500)
+        .background(Palette.ground)
         .task { await loadAccount() }
     }
 
-    private var appKeyInstructions: some View {
-        VStack(alignment: .leading, spacing: 6) {
-            Text("Dropbox の App key が見つかりません。次のいずれかを設定してください。")
-                .font(.callout)
-                .foregroundStyle(.orange)
-            Text("""
-            1. 環境変数 DROPBOX_APP_KEY
-            2. \(AppConfig.userConfigURL.path) の AppKey
-            3. アプリバンドル内の DropboxConfig.plist の AppKey
-            """)
-            .font(.caption)
-            .foregroundStyle(.secondary)
-            .textSelection(.enabled)
+    // MARK: - Dropbox 連携
+
+    private var connectionCard: some View {
+        Card {
+            VStack(alignment: .leading, spacing: Metrics.stack) {
+                SectionHeader("Dropbox 連携")
+
+                ConnectionBadge(state: auth.state)
+
+                if let accountEmail {
+                    LabeledContent("アカウント", value: accountEmail)
+                        .font(.callout)
+                }
+
+                if case .needsReauthentication(let reason) = auth.state {
+                    Text(reason)
+                        .font(.callout)
+                        .foregroundStyle(.orange)
+                        .fixedSize(horizontal: false, vertical: true)
+                }
+
+                if case .notConfigured = auth.state {
+                    appKeyInstructions
+                }
+
+                HStack(spacing: Metrics.stack) {
+                    Button("再認証") { Task { await signIn() } }
+                        .disabled(auth.state == .notConfigured)
+                    Button("サインアウト") { auth.signOut(); accountEmail = nil }
+                        .disabled(!auth.state.isSignedIn)
+                }
+            }
         }
     }
+
+    private var appKeyInstructions: some View {
+        VStack(alignment: .leading, spacing: Metrics.tight) {
+            Label("App key が見つかりません", systemImage: "key.slash")
+                .font(.callout.weight(.medium))
+                .foregroundStyle(.orange)
+            Text("次のいずれかに設定してください。")
+                .font(.caption)
+                .foregroundStyle(.secondary)
+            VStack(alignment: .leading, spacing: 3) {
+                instructionRow(1, "環境変数 DROPBOX_APP_KEY")
+                instructionRow(2, AppConfig.userConfigURL.path)
+                instructionRow(3, "アプリに同梱した DropboxConfig.plist")
+            }
+        }
+        .padding(Metrics.stack)
+        .frame(maxWidth: .infinity, alignment: .leading)
+        .background(
+            RoundedRectangle(cornerRadius: Metrics.controlRadius, style: .continuous)
+                .fill(Color.orange.opacity(0.08))
+        )
+    }
+
+    private func instructionRow(_ number: Int, _ text: String) -> some View {
+        HStack(alignment: .top, spacing: 6) {
+            Text("\(number).")
+                .font(.caption.monospacedDigit())
+                .foregroundStyle(.secondary)
+            Text(text)
+                .font(.caption)
+                .monospaced()
+                .textSelection(.enabled)
+                .fixedSize(horizontal: false, vertical: true)
+        }
+    }
+
+    // MARK: - アップロード先
+
+    private var destinationCard: some View {
+        Card {
+            VStack(alignment: .leading, spacing: Metrics.stack) {
+                SectionHeader("アップロード先", subtitle: "フェーズ1では固定です")
+
+                HStack(spacing: Metrics.stack) {
+                    Image(systemName: "folder")
+                        .symbolRenderingMode(.hierarchical)
+                        .foregroundStyle(Color.accentColor)
+                    // フェーズ1では固定。将来ここを編集可能にする。
+                    TextField("", text: .constant(coordinator.remoteFolder))
+                        .textFieldStyle(.roundedBorder)
+                        .monospaced()
+                        .disabled(true)
+                }
+            }
+        }
+    }
+
+    // MARK: - 処理
 
     private func signIn() async {
         errorMessage = nil

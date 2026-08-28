@@ -7,21 +7,22 @@ struct StorageScanView: View {
     @State private var highlighted: FileCategory?
 
     var body: some View {
-        VStack(alignment: .leading, spacing: 0) {
+        VStack(spacing: 0) {
             toolbar
-            Divider()
+            RowDivider()
             content
                 .frame(maxWidth: .infinity, maxHeight: .infinity)
         }
     }
 
     private var toolbar: some View {
-        HStack(spacing: 12) {
+        HStack(spacing: Metrics.stack) {
             Button {
                 model.chooseFolderAndScan()
             } label: {
                 Label("フォルダをスキャン", systemImage: "magnifyingglass")
             }
+            .buttonStyle(.borderedProminent)
             .disabled(model.isScanning)
 
             if model.lastRoot != nil && !model.isScanning {
@@ -42,168 +43,209 @@ struct StorageScanView: View {
                 Button("中断", role: .cancel) { model.cancel() }
             }
         }
-        .padding(12)
+        .padding(.horizontal, Metrics.gutter)
+        .padding(.vertical, Metrics.stack)
     }
 
     @ViewBuilder
     private var content: some View {
         switch model.state {
         case .idle:
-            placeholder
+            EmptyState(
+                systemImage: "chart.pie",
+                title: "使用容量を調べる",
+                message: "フォルダを選ぶと、写真・動画・音楽・書類などの種別ごとに容量を集計します。ホームフォルダ全体は時間がかかるので、まずは「ミュージック」や「ピクチャ」から試すのがおすすめです。"
+            ) {
+                Button {
+                    model.chooseFolderAndScan()
+                } label: {
+                    Label("フォルダを選択", systemImage: "folder")
+                        .frame(minWidth: 150)
+                }
+                .buttonStyle(.borderedProminent)
+                .controlSize(.large)
+            }
+
         case .scanning(let progress):
             scanning(progress)
+
         case .failed(let message):
-            VStack(spacing: 12) {
-                Image(systemName: "exclamationmark.triangle.fill")
-                    .font(.largeTitle)
-                    .foregroundStyle(.orange)
-                Text(message)
-                    .multilineTextAlignment(.center)
+            EmptyState(
+                systemImage: "exclamationmark.triangle",
+                title: "スキャンできませんでした",
+                message: message
+            ) {
                 Button("もう一度スキャン") { model.rescan() }
+                    .buttonStyle(.borderedProminent)
                     .disabled(model.lastRoot == nil)
             }
-            .padding()
-            .frame(maxWidth: .infinity, maxHeight: .infinity)
+
         case .finished(let result):
             results(result)
         }
     }
 
-    private var placeholder: some View {
-        VStack(spacing: 12) {
-            Image(systemName: "chart.pie")
-                .font(.system(size: 48))
-                .foregroundStyle(.secondary)
-            Text("フォルダを選ぶと、種別ごとの使用容量を集計します。")
-                .foregroundStyle(.secondary)
-            Text("ホームフォルダ全体を選ぶと時間がかかります。まずは「ピクチャ」や「ミュージック」から試すのがおすすめです。")
-                .font(.caption)
-                .foregroundStyle(.tertiary)
-                .multilineTextAlignment(.center)
-                .frame(maxWidth: 420)
-        }
-        .frame(maxWidth: .infinity, maxHeight: .infinity)
-    }
+    // MARK: - 走査中
 
     private func scanning(_ progress: StorageScanner.Progress) -> some View {
-        VStack(alignment: .leading, spacing: 12) {
-            // 総数が事前に分からないので、進捗率ではなく実績値を出す。
-            ProgressView()
-                .progressViewStyle(.linear)
-            Text("\(progress.filesScanned) 件 / \(ByteFormatting.string(progress.bytesScanned)) を集計しました")
-                .font(.callout)
-                .monospacedDigit()
-            Text(progress.currentPath)
-                .font(.caption)
-                .foregroundStyle(.secondary)
-                .lineLimit(1)
-                .truncationMode(.middle)
+        VStack(alignment: .leading, spacing: Metrics.block) {
+            Card {
+                VStack(alignment: .leading, spacing: Metrics.stack) {
+                    HStack(spacing: Metrics.stack) {
+                        ProgressView()
+                            .controlSize(.small)
+                        Text("集計しています")
+                            .font(.headline)
+                        Spacer()
+                    }
+
+                    // 総数が事前に分からないので、進捗率ではなく実績値を出す。
+                    HStack(spacing: Metrics.block) {
+                        metric("見たファイル", "\(progress.filesScanned)")
+                        metric("合計サイズ", ByteFormatting.string(progress.bytesScanned))
+                    }
+
+                    Text(progress.currentPath)
+                        .font(.caption)
+                        .foregroundStyle(.tertiary)
+                        .lineLimit(1)
+                        .truncationMode(.middle)
+                }
+            }
             Spacer()
         }
-        .padding()
+        .padding(Metrics.gutter)
     }
+
+    private func metric(_ label: String, _ value: String) -> some View {
+        VStack(alignment: .leading, spacing: 1) {
+            Text(label)
+                .font(.caption)
+                .foregroundStyle(.secondary)
+            Text(value)
+                .font(.title3.weight(.medium))
+                .monospacedDigit()
+        }
+    }
+
+    // MARK: - 結果
 
     private func results(_ result: ScanResult) -> some View {
         ScrollView {
-            VStack(alignment: .leading, spacing: 24) {
-                header(result)
+            VStack(alignment: .leading, spacing: Metrics.block) {
+                headerCard(result)
 
                 if let volume = result.volume {
-                    VolumeCapacityBar(volume: volume)
+                    Card { VolumeCapacityBar(volume: volume) }
                 }
 
-                HStack(alignment: .top, spacing: 24) {
-                    CategoryShareChart(usages: result.usages, highlighted: $highlighted)
-                        .frame(width: 260)
-                    CategorySizeChart(usages: result.usages, highlighted: $highlighted)
+                HStack(alignment: .top, spacing: Metrics.block) {
+                    Card {
+                        CategoryShareChart(usages: result.usages, highlighted: $highlighted)
+                    }
+                    .frame(width: 250)
+
+                    Card {
+                        CategorySizeChart(usages: result.usages, highlighted: $highlighted)
+                    }
                 }
 
-                VStack(alignment: .leading, spacing: 8) {
-                    Text("内訳")
-                        .font(.headline)
-                    CategoryLegendTable(usages: result.usages, highlighted: $highlighted)
+                Card {
+                    VStack(alignment: .leading, spacing: Metrics.stack) {
+                        SectionHeader("内訳", subtitle: "行にポインタを合わせるとグラフ側が強調されます")
+                        CategoryLegendTable(usages: result.usages, highlighted: $highlighted)
+                    }
                 }
 
-                largestFiles(result)
+                largestFilesCard(result)
 
                 if !result.unreadablePaths.isEmpty {
-                    skipped(result)
+                    skippedCard(result)
                 }
             }
-            .padding()
+            .padding(Metrics.gutter)
         }
     }
 
-    private func header(_ result: ScanResult) -> some View {
-        VStack(alignment: .leading, spacing: 4) {
-            Text(ByteFormatting.string(result.totalBytes))
-                .font(.system(size: 34, weight: .semibold))
-                .monospacedDigit()
-            Text("\(result.root.path) · \(result.fileCount) ファイル")
+    private func headerCard(_ result: ScanResult) -> some View {
+        Card {
+            VStack(alignment: .leading, spacing: Metrics.tight) {
+                Text(ByteFormatting.string(result.totalBytes))
+                    .font(.system(size: 38, weight: .semibold, design: .rounded))
+                    .monospacedDigit()
+
+                HStack(spacing: 6) {
+                    Image(systemName: "folder")
+                        .symbolRenderingMode(.hierarchical)
+                        .foregroundStyle(.secondary)
+                    Text(result.root.path)
+                        .lineLimit(1)
+                        .truncationMode(.middle)
+                    Text("·")
+                        .foregroundStyle(.tertiary)
+                    Text("\(result.fileCount) ファイル")
+                        .monospacedDigit()
+                        .foregroundStyle(.secondary)
+                }
                 .font(.callout)
-                .foregroundStyle(.secondary)
-                .lineLimit(1)
-                .truncationMode(.middle)
-            Text(result.scannedAt.formatted(date: .abbreviated, time: .shortened) + " 時点")
-                .font(.caption)
-                .foregroundStyle(.tertiary)
+
+                Text(result.scannedAt.formatted(date: .abbreviated, time: .shortened) + " 時点")
+                    .font(.caption)
+                    .foregroundStyle(.tertiary)
+            }
         }
     }
 
-    private func largestFiles(_ result: ScanResult) -> some View {
-        VStack(alignment: .leading, spacing: 8) {
-            Text("容量の大きいファイル")
-                .font(.headline)
-            Text("削除の判断はここから。フェーズ1の「バックアップ」で Dropbox に退避してから消せます。")
-                .font(.caption)
-                .foregroundStyle(.secondary)
+    private func largestFilesCard(_ result: ScanResult) -> some View {
+        Card(padding: 0) {
+            VStack(alignment: .leading, spacing: 0) {
+                SectionHeader(
+                    "容量の大きいファイル",
+                    subtitle: "行をクリックすると Finder で表示します"
+                )
+                .padding(.horizontal, Metrics.cardPadding)
+                .padding(.top, Metrics.cardPadding)
+                .padding(.bottom, Metrics.tight)
 
-            VStack(spacing: 0) {
-                ForEach(result.largestFiles.prefix(20)) { file in
-                    HStack(spacing: 8) {
-                        Image(systemName: file.category.symbolName)
-                            .foregroundStyle(.secondary)
-                            .frame(width: 18)
-                        VStack(alignment: .leading, spacing: 2) {
-                            Text(file.fileName)
-                                .lineLimit(1)
-                                .truncationMode(.middle)
-                            Text(file.parentPath)
-                                .font(.caption)
-                                .foregroundStyle(.secondary)
-                                .lineLimit(1)
-                                .truncationMode(.middle)
-                        }
-                        Spacer()
-                        Text(ByteFormatting.string(file.byteSize))
-                            .monospacedDigit()
-                            .foregroundStyle(.secondary)
+                let files = Array(result.largestFiles.prefix(20))
+                ForEach(files) { file in
+                    FileRow(
+                        systemImage: file.category.symbolName,
+                        name: file.fileName,
+                        detail: file.parentPath,
+                        symbolTint: file.category.chartColor
+                    ) {
+                        MonoText(ByteFormatting.string(file.byteSize))
                     }
-                    .padding(.vertical, 4)
+                    .padding(.horizontal, Metrics.cardPadding)
                     .contentShape(Rectangle())
                     .onTapGesture {
                         NSWorkspace.shared.activateFileViewerSelecting([file.url])
                     }
-                    .help("Finder で表示")
-                    Divider()
+
+                    if file.id != files.last?.id {
+                        RowDivider().padding(.leading, Metrics.cardPadding + 30)
+                    }
                 }
+                .padding(.bottom, Metrics.tight)
             }
         }
     }
 
-    private func skipped(_ result: ScanResult) -> some View {
-        VStack(alignment: .leading, spacing: 6) {
-            Text("読み取れなかった項目 (\(result.unreadablePaths.count))")
-                .font(.headline)
-            Text("アクセス権が無いなどの理由で集計から外れています。")
-                .font(.caption)
-                .foregroundStyle(.secondary)
-            ForEach(result.unreadablePaths.prefix(10), id: \.self) { path in
-                Text(path)
-                    .font(.caption)
-                    .foregroundStyle(.tertiary)
-                    .lineLimit(1)
-                    .truncationMode(.middle)
+    private func skippedCard(_ result: ScanResult) -> some View {
+        Card {
+            VStack(alignment: .leading, spacing: Metrics.tight) {
+                SectionHeader(
+                    "読み取れなかった項目 (\(result.unreadablePaths.count))",
+                    subtitle: "アクセス権が無いなどの理由で集計から外れています"
+                )
+                ForEach(result.unreadablePaths.prefix(10), id: \.self) { path in
+                    Text(path)
+                        .font(.caption)
+                        .foregroundStyle(.tertiary)
+                        .lineLimit(1)
+                        .truncationMode(.middle)
+                }
             }
         }
     }

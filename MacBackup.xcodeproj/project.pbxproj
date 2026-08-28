@@ -27,6 +27,7 @@
 		70B393AB1CE552B1BBFCEA3A /* ByteFormatting.swift in Sources */ = {isa = PBXBuildFile; fileRef = 50853FCD4BD2AAD1895E9A9C /* ByteFormatting.swift */; };
 		8C60E728961A6403EA763106 /* ContentView.swift in Sources */ = {isa = PBXBuildFile; fileRef = C7C1391615510282CBD1ADE2 /* ContentView.swift */; };
 		7D5CFBFC199A2868E8EACF84 /* DeletionConfirmationView.swift in Sources */ = {isa = PBXBuildFile; fileRef = ACE87FDC95DAE992E02D4CAF /* DeletionConfirmationView.swift */; };
+		B504DE67B54E4FF12DE3E59E /* DesignSystem.swift in Sources */ = {isa = PBXBuildFile; fileRef = F4A134566491AA9D0B57F345 /* DesignSystem.swift */; };
 		DB5D0C1CC70B039D1B2E96FA /* FileCategory+Chart.swift in Sources */ = {isa = PBXBuildFile; fileRef = FD770AB7737A98F4B389D04A /* FileCategory+Chart.swift */; };
 		FB5A820F158A2D7DE185A040 /* FilePicker.swift in Sources */ = {isa = PBXBuildFile; fileRef = D6F4E957247B306AE281FD1A /* FilePicker.swift */; };
 		AB28432DB78DFCAB50F562E1 /* SettingsView.swift in Sources */ = {isa = PBXBuildFile; fileRef = AAC6525AC7C4ED5DDFCDBCF2 /* SettingsView.swift */; };
@@ -57,6 +58,7 @@
 		50853FCD4BD2AAD1895E9A9C /* ByteFormatting.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "ByteFormatting.swift"; sourceTree = "<group>"; };
 		C7C1391615510282CBD1ADE2 /* ContentView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "ContentView.swift"; sourceTree = "<group>"; };
 		ACE87FDC95DAE992E02D4CAF /* DeletionConfirmationView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "DeletionConfirmationView.swift"; sourceTree = "<group>"; };
+		F4A134566491AA9D0B57F345 /* DesignSystem.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "DesignSystem.swift"; sourceTree = "<group>"; };
 		FD770AB7737A98F4B389D04A /* FileCategory+Chart.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "FileCategory+Chart.swift"; sourceTree = "<group>"; };
 		D6F4E957247B306AE281FD1A /* FilePicker.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "FilePicker.swift"; sourceTree = "<group>"; };
 		AAC6525AC7C4ED5DDFCDBCF2 /* SettingsView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "SettingsView.swift"; sourceTree = "<group>"; };
@@ -177,6 +179,7 @@
 				50853FCD4BD2AAD1895E9A9C /* ByteFormatting.swift */,
 				C7C1391615510282CBD1ADE2 /* ContentView.swift */,
 				ACE87FDC95DAE992E02D4CAF /* DeletionConfirmationView.swift */,
+				F4A134566491AA9D0B57F345 /* DesignSystem.swift */,
 				FD770AB7737A98F4B389D04A /* FileCategory+Chart.swift */,
 				D6F4E957247B306AE281FD1A /* FilePicker.swift */,
 				AAC6525AC7C4ED5DDFCDBCF2 /* SettingsView.swift */,
@@ -292,6 +295,7 @@
 				70B393AB1CE552B1BBFCEA3A /* ByteFormatting.swift in Sources */,
 				8C60E728961A6403EA763106 /* ContentView.swift in Sources */,
 				7D5CFBFC199A2868E8EACF84 /* DeletionConfirmationView.swift in Sources */,
+				B504DE67B54E4FF12DE3E59E /* DesignSystem.swift in Sources */,
 				DB5D0C1CC70B039D1B2E96FA /* FileCategory+Chart.swift in Sources */,
 				FB5A820F158A2D7DE185A040 /* FilePicker.swift in Sources */,
 				AB28432DB78DFCAB50F562E1 /* SettingsView.swift in Sources */,
