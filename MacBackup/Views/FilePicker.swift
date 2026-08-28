@@ -1,7 +1,7 @@
 import AppKit
 
-/// `NSOpenPanel` でバックアップ対象のファイルを選ぶ。
-/// フォルダは選ばせない（フェーズ1はユーザーが選んだファイルのみが対象）。
+/// `NSOpenPanel` でファイル／フォルダを選ぶ。
+/// バックアップ（フェーズ1）はファイルのみ、スキャン（フェーズ2）はフォルダのみを選ばせる。
 enum FilePicker {
 
     @MainActor
@@ -20,4 +20,23 @@ enum FilePicker {
         guard panel.runModal() == .OK else { return [] }
         return panel.urls
     }
+
+    /// スキャン対象のフォルダを 1 つ選ぶ。
+    @MainActor
+    static func selectFolder() -> URL? {
+        let panel = NSOpenPanel()
+        panel.title = "スキャンするフォルダを選択"
+        panel.prompt = "スキャン"
+        panel.message = "使用容量を調べるフォルダを選んでください。"
+        panel.allowsMultipleSelection = false
+        panel.canChooseFiles = false
+        panel.canChooseDirectories = true
+        panel.canCreateDirectories = false
+        panel.treatsFilePackagesAsDirectories = false
+        panel.directoryURL = FileManager.default.homeDirectoryForCurrentUser
+
+        guard panel.runModal() == .OK else { return nil }
+        return panel.urls.first
+    }
 }
+

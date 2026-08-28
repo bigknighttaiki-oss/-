@@ -4,6 +4,7 @@ import SwiftUI
 struct MacBackupApp: App {
     @StateObject private var auth: DropboxAuthService
     @StateObject private var coordinator: BackupCoordinator
+    @StateObject private var scanModel = StorageScanViewModel()
 
     @MainActor
     init() {
@@ -17,6 +18,7 @@ struct MacBackupApp: App {
             ContentView()
                 .environmentObject(auth)
                 .environmentObject(coordinator)
+                .environmentObject(scanModel)
         }
         .windowResizability(.contentMinSize)
         .commands {

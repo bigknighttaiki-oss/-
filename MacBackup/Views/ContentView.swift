@@ -1,42 +1,68 @@
-import Combine
 import SwiftUI
 
+/// アプリのシェル。サイドバーで機能を切り替える。
 struct ContentView: View {
     @EnvironmentObject private var auth: DropboxAuthService
     @EnvironmentObject private var coordinator: BackupCoordinator
 
+    enum Feature: String, CaseIterable, Identifiable {
+        case backup
+        case storage
+
+        var id: String { rawValue }
+
+        var title: String {
+            switch self {
+            case .backup: return "バックアップ"
+            case .storage: return "ストレージ"
+            }
+        }
+
+        var symbolName: String {
+            switch self {
+            case .backup: return "arrow.up.doc.on.clipboard"
+            case .storage: return "chart.pie"
+            }
+        }
+    }
+
+    @State private var selection: Feature? = .backup
+
+    private var current: Feature { selection ?? .backup }
     @State private var isShowingSettings = false
-    @State private var authErrorMessage: String?
-    @State private var isShowingAuthAlert = false
 
     var body: some View {
-        VStack(spacing: 0) {
-            header
-            Divider()
-            content
-                .frame(maxWidth: .infinity, maxHeight: .infinity)
+        NavigationSplitView {
+            List(selection: $selection) {
+                ForEach(Feature.allCases) { feature in
+                    Label(feature.title, systemImage: feature.symbolName)
+                        .tag(feature)
+                }
+            }
+            .navigationSplitViewColumnWidth(min: 170, ideal: 190, max: 240)
+        } detail: {
+            VStack(spacing: 0) {
+                header
+                Divider()
+                switch current {
+                case .backup:
+                    BackupView(onOpenSettings: { isShowingSettings = true })
+                case .storage:
+                    StorageScanView()
+                }
+            }
         }
-        .frame(minWidth: 640, minHeight: 460)
+        .frame(minWidth: 900, minHeight: 560)
         .sheet(isPresented: $isShowingSettings) {
             SettingsView()
                 .environmentObject(auth)
                 .environmentObject(coordinator)
         }
-        .alert("Dropbox の認証が必要です", isPresented: $isShowingAuthAlert) {
-            Button("再認証") { Task { await signIn() } }
-            Button("閉じる", role: .cancel) {}
-        } message: {
-            Text(authErrorMessage ?? "Dropbox に再度サインインしてください。")
-        }
-        .onReceive(coordinator.$authenticationErrorMessage.compactMap { $0 }) { message in
-            authErrorMessage = message
-            isShowingAuthAlert = true
-        }
     }
 
     private var header: some View {
         HStack {
-            Label("Mac Backup", systemImage: "externaldrive.badge.icloud")
+            Label(current.title, systemImage: current.symbolName)
                 .font(.headline)
             Spacer()
             ConnectionBadge(state: auth.state)
@@ -48,76 +74,6 @@ struct ContentView: View {
             .help("Dropbox 連携の状態やアップロード先を確認する")
         }
         .padding(12)
-    }
-
-    @ViewBuilder
-    private var content: some View {
-        switch coordinator.phase {
-        case .idle:
-            startView
-        case .uploading:
-            UploadProgressView()
-        case .review:
-            BackupResultsView()
-        }
-    }
-
-    private var startView: some View {
-        VStack(spacing: 16) {
-            Spacer()
-            Image(systemName: "arrow.up.doc.on.clipboard")
-                .font(.system(size: 48))
-                .foregroundStyle(.secondary)
-            Text("写真や音楽制作のファイルを Dropbox に退避します。")
-                .foregroundStyle(.secondary)
-            Text("アップロード先: \(coordinator.remoteFolder)/")
-                .font(.callout)
-                .foregroundStyle(.tertiary)
-
-            switch auth.state {
-            case .notConfigured:
-                VStack(spacing: 8) {
-                    Text("Dropbox の App key が設定されていません。")
-                        .foregroundStyle(.orange)
-                    Button("設定を開く") { isShowingSettings = true }
-                }
-            case .signedIn:
-                Button {
-                    let urls = FilePicker.selectFiles()
-                    if !urls.isEmpty { coordinator.start(urls: urls) }
-                } label: {
-                    Label("バックアップ", systemImage: "square.and.arrow.up")
-                        .frame(minWidth: 160)
-                }
-                .keyboardShortcut(.defaultAction)
-                .controlSize(.large)
-            case .authenticating:
-                ProgressView("Dropbox にサインインしています…")
-            case .signedOut, .needsReauthentication:
-                VStack(spacing: 8) {
-                    if case .needsReauthentication(let reason) = auth.state {
-                        Text(reason)
-                            .foregroundStyle(.orange)
-                            .multilineTextAlignment(.center)
-                    }
-                    Button("Dropbox にサインイン") { Task { await signIn() } }
-                        .controlSize(.large)
-                }
-            }
-            Spacer()
-        }
-        .padding()
-    }
-
-    private func signIn() async {
-        do {
-            try await auth.signIn()
-        } catch DropboxError.cancelled {
-            // ユーザーが自分で閉じた場合は何も出さない。
-        } catch {
-            authErrorMessage = error.localizedDescription
-            isShowingAuthAlert = true
-        }
     }
 }
 
