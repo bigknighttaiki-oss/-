@@ -1,0 +1,28 @@
+# XcodeGen (https://github.com/yonaskolb/XcodeGen) 用の定義。
+# `xcodegen generate` で MacBackup.xcodeproj を作り直せる。
+# XcodeGen を入れていない場合は `python3 Scripts/generate_xcodeproj.py` を使う。
+name: MacBackup
+options:
+  deploymentTarget:
+    macOS: "13.0"
+  developmentLanguage: ja
+settings:
+  base:
+    SWIFT_VERSION: "5.9"
+targets:
+  MacBackup:
+    type: application
+    platform: macOS
+    sources:
+      - path: MacBackup
+        excludes:
+          - "Config/DropboxConfig.example.plist"
+    settings:
+      base:
+        PRODUCT_BUNDLE_IDENTIFIER: com.example.MacBackup
+        INFOPLIST_FILE: MacBackup/Resources/Info.plist
+        CODE_SIGN_ENTITLEMENTS: MacBackup/Resources/MacBackup.entitlements
+        GENERATE_INFOPLIST_FILE: NO
+        ENABLE_HARDENED_RUNTIME: YES
+        MARKETING_VERSION: "0.1.0"
+        CURRENT_PROJECT_VERSION: "1"

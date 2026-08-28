@@ -1,0 +1,8 @@
+.DS_Store
+build/
+DerivedData/
+*.xcuserstate
+xcuserdata/
+*.xcworkspace/xcshareddata/
+# App key を含む実設定ファイルはコミットしない（example のみ追跡する）。
+MacBackup/Config/DropboxConfig.plist
