@@ -146,7 +146,7 @@ struct StorageScanner {
             usages: usages,
             largestFiles: largest.sortedDescending(),
             unreadablePaths: unreadablePaths,
-            volume: Self.volumeUsage(of: root)
+            volume: DiskSpace.usage(at: root)
         )
     }
 
@@ -178,16 +178,6 @@ struct StorageScanner {
         return 0
     }
 
-    private static func volumeUsage(of url: URL) -> VolumeUsage? {
-        guard let values = try? url.resourceValues(forKeys: [
-            .volumeTotalCapacityKey,
-            .volumeAvailableCapacityForImportantUsageKey
-        ]) else { return nil }
-
-        guard let total = values.volumeTotalCapacity else { return nil }
-        let available = values.volumeAvailableCapacityForImportantUsage ?? 0
-        return VolumeUsage(totalBytes: Int64(total), availableBytes: Int64(available))
-    }
 }
 
 /// 容量の大きいファイル上位 N 件だけを保持する小さなバッファ。

@@ -50,10 +50,20 @@ struct BackupResultsView: View {
     // MARK: - 集計
 
     private var summaryCard: some View {
-        Card {
-            VStack(alignment: .leading, spacing: Metrics.stack) {
-                Text("バックアップが終わりました")
+        Card(padding: 24) {
+            VStack(spacing: Metrics.block) {
+                RadialGauge(segments: outcomeSegments) {
+                    GaugeReadout(
+                        value: ByteFormatting.string(uploadedBytes),
+                        caption: "Dropbox に保存",
+                        note: "\(coordinator.successfulItems.count) / \(coordinator.items.count) ファイル"
+                    )
+                }
+                .frame(width: 220, height: 220)
+
+                Text(headline)
                     .font(.title3.weight(.semibold))
+                    .multilineTextAlignment(.center)
 
                 HStack(spacing: Metrics.stack) {
                     StatusChip(
@@ -75,10 +85,39 @@ struct BackupResultsView: View {
                             tint: .orange
                         )
                     }
-                    Spacer(minLength: 0)
                 }
             }
+            .frame(maxWidth: .infinity)
         }
+    }
+
+    /// 成功・失敗・スキップの件数をそのままリングの比率にする。
+    private var outcomeSegments: [RadialGauge.Segment] {
+        var segments: [RadialGauge.Segment] = []
+        if !coordinator.successfulItems.isEmpty {
+            segments.append(.init(id: "ok", value: Double(coordinator.successfulItems.count), color: .green))
+        }
+        if !coordinator.failedItems.isEmpty {
+            segments.append(.init(id: "ng", value: Double(coordinator.failedItems.count), color: .red))
+        }
+        if !coordinator.skippedItems.isEmpty {
+            segments.append(.init(id: "skip", value: Double(coordinator.skippedItems.count), color: .orange))
+        }
+        if segments.isEmpty {
+            segments.append(.init(id: "none", value: 1, color: Palette.border.opacity(0.9)))
+        }
+        return segments
+    }
+
+    private var uploadedBytes: Int64 {
+        coordinator.successfulItems.reduce(Int64(0)) { $0 + $1.byteSize }
+    }
+
+    private var headline: String {
+        if coordinator.failedItems.isEmpty && coordinator.skippedItems.isEmpty {
+            return "バックアップが終わりました"
+        }
+        return "バックアップが終わりました（一部は送れていません）"
     }
 
     // MARK: - 各セクション

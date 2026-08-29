@@ -1,81 +1,57 @@
 import SwiftUI
 
-/// アップロード中の画面。全体の進捗と、いま送っているファイルの進捗を出す。
+/// アップロード中の画面。中央のリングが全体の進捗、その下が 1 ファイルずつの状態。
 struct UploadProgressView: View {
     @EnvironmentObject private var coordinator: BackupCoordinator
 
     var body: some View {
-        VStack(alignment: .leading, spacing: Metrics.block) {
-            overallCard
-            currentCard
-            queueCard
-        }
-        .padding(Metrics.gutter)
-        .frame(maxWidth: .infinity, maxHeight: .infinity, alignment: .top)
-    }
-
-    // MARK: - 全体の進捗
-
-    private var overallCard: some View {
-        Card {
-            VStack(alignment: .leading, spacing: Metrics.stack) {
-                HStack(alignment: .firstTextBaseline) {
-                    Text("アップロード中")
-                        .font(.headline)
-                    Spacer()
-                    Text("\(Int((coordinator.overallProgress * 100).rounded()))%")
-                        .font(.system(size: 30, weight: .semibold, design: .rounded))
-                        .monospacedDigit()
-                }
-
-                ProgressView(value: coordinator.overallProgress)
-                    .progressViewStyle(.linear)
-
-                HStack {
-                    Text("\(finishedCount) / \(coordinator.items.count) ファイル")
-                    Spacer()
-                    Text("残り \(coordinator.items.count - finishedCount) 件")
-                }
-                .font(.caption)
-                .monospacedDigit()
-                .foregroundStyle(.secondary)
+        ScrollView {
+            VStack(spacing: Metrics.block) {
+                hero
+                queueCard
             }
+            .padding(Metrics.gutter)
+            .frame(maxWidth: 860)
+            .frame(maxWidth: .infinity)
         }
     }
 
-    // MARK: - 送信中のファイル
+    private var hero: some View {
+        Card(padding: 24) {
+            VStack(spacing: Metrics.block) {
+                RadialGauge(
+                    segments: [
+                        .init(id: "done", value: max(coordinator.overallProgress, 0.001), color: .accentColor),
+                        .init(id: "rest", value: max(1 - coordinator.overallProgress, 0.001),
+                              color: Palette.border.opacity(0.9))
+                    ]
+                ) {
+                    GaugeReadout(
+                        value: "\(Int((coordinator.overallProgress * 100).rounded()))%",
+                        caption: "アップロード中",
+                        note: "\(finishedCount) / \(coordinator.items.count) ファイル"
+                    )
+                }
+                .frame(width: 240, height: 240)
 
-    @ViewBuilder
-    private var currentCard: some View {
-        if let current = coordinator.currentItem {
-            Card {
-                VStack(alignment: .leading, spacing: Metrics.stack) {
-                    HStack(spacing: Metrics.stack) {
-                        Image(systemName: current.category.symbolName)
-                            .symbolRenderingMode(.hierarchical)
-                            .foregroundStyle(current.category.chartColor)
-                            .font(.system(size: 20))
-
-                        VStack(alignment: .leading, spacing: 2) {
-                            Text(current.fileName)
-                                .lineLimit(1)
-                                .truncationMode(.middle)
-                            MonoText(
-                                "\(ByteFormatting.string(current.byteSize)) · \(Int((current.status.progress * 100).rounded()))%",
-                                font: .caption
-                            )
-                        }
-                        Spacer(minLength: 0)
+                if let current = coordinator.currentItem {
+                    VStack(spacing: Metrics.tight) {
+                        Text(current.fileName)
+                            .lineLimit(1)
+                            .truncationMode(.middle)
+                        MonoText(
+                            "\(ByteFormatting.string(current.byteSize)) · \(Int((current.status.progress * 100).rounded()))%",
+                            font: .caption
+                        )
                     }
-
-                    ProgressView(value: current.status.progress)
-                        .progressViewStyle(.linear)
+                    .frame(maxWidth: 460)
                 }
+
+                Button("中断", role: .cancel) { coordinator.cancel() }
             }
+            .frame(maxWidth: .infinity)
         }
     }
-
-    // MARK: - 待ち行列
 
     private var queueCard: some View {
         Card(padding: 0) {
@@ -85,33 +61,26 @@ struct UploadProgressView: View {
                     .padding(.top, Metrics.cardPadding)
                     .padding(.bottom, Metrics.tight)
 
-                ScrollView {
-                    LazyVStack(spacing: 0) {
-                        ForEach(coordinator.items) { item in
-                            FileRow(
-                                systemImage: item.category.symbolName,
-                                name: item.fileName,
-                                symbolTint: item.category.chartColor
-                            ) {
-                                UploadStatusLabel(status: item.status)
-                            }
-                            .padding(.horizontal, Metrics.cardPadding)
-
-                            if item.id != coordinator.items.last?.id {
-                                RowDivider().padding(.leading, Metrics.cardPadding + 30)
-                            }
+                ForEach(coordinator.items) { item in
+                    HStack(spacing: Metrics.stack) {
+                        CategoryBadge(category: item.category, size: 28)
+                        VStack(alignment: .leading, spacing: 2) {
+                            Text(item.fileName)
+                                .lineLimit(1)
+                                .truncationMode(.middle)
+                            MonoText(ByteFormatting.string(item.byteSize), font: .caption)
                         }
+                        Spacer(minLength: Metrics.stack)
+                        UploadStatusLabel(status: item.status)
+                    }
+                    .padding(.horizontal, Metrics.cardPadding)
+                    .padding(.vertical, 8)
+
+                    if item.id != coordinator.items.last?.id {
+                        RowDivider().padding(.leading, 52)
                     }
                 }
-                .frame(maxHeight: 220)
-
-                RowDivider()
-
-                HStack {
-                    Spacer()
-                    Button("中断", role: .cancel) { coordinator.cancel() }
-                }
-                .padding(Metrics.cardPadding)
+                .padding(.bottom, Metrics.tight)
             }
         }
     }

@@ -98,45 +98,6 @@ struct StatusChip: View {
     }
 }
 
-/// 何も無い状態の案内。記号・見出し・説明・操作を縦に積む。
-struct EmptyState<Actions: View>: View {
-    let systemImage: String
-    let title: String
-    var message: String? = nil
-    @ViewBuilder var actions: Actions
-
-    var body: some View {
-        VStack(spacing: Metrics.block) {
-            ZStack {
-                Circle()
-                    .fill(Color.accentColor.opacity(0.10))
-                    .frame(width: 92, height: 92)
-                Image(systemName: systemImage)
-                    .font(.system(size: 38, weight: .regular))
-                    .symbolRenderingMode(.hierarchical)
-                    .foregroundStyle(Color.accentColor)
-            }
-
-            VStack(spacing: Metrics.tight) {
-                Text(title)
-                    .font(.title3.weight(.semibold))
-                    .multilineTextAlignment(.center)
-                if let message {
-                    Text(message)
-                        .font(.callout)
-                        .foregroundStyle(.secondary)
-                        .multilineTextAlignment(.center)
-                        .frame(maxWidth: 420)
-                }
-            }
-
-            actions
-        }
-        .frame(maxWidth: .infinity, maxHeight: .infinity)
-        .padding(Metrics.gutter)
-    }
-}
-
 /// ファイル 1 行の共通レイアウト。進捗・結果・大きいファイル一覧で使い回す。
 struct FileRow<Trailing: View>: View {
     let systemImage: String

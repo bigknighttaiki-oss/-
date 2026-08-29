@@ -43,70 +43,129 @@ struct BackupView: View {
 
     @ViewBuilder
     private var startView: some View {
+        ScrollView {
+            VStack(spacing: Metrics.block) {
+                Card(padding: 24) {
+                    VStack(spacing: Metrics.block) {
+                        heroMark
+                        heroText
+                        heroActions
+                    }
+                    .frame(maxWidth: .infinity)
+                }
+            }
+            .padding(Metrics.gutter)
+            .frame(maxWidth: 860)
+            .frame(maxWidth: .infinity)
+        }
+    }
+
+    /// 中央の丸い記号。ストレージ画面のリングと大きさを揃える。
+    private var heroMark: some View {
+        ZStack {
+            Circle()
+                .strokeBorder(Palette.border.opacity(0.45), lineWidth: 26)
+            Circle()
+                .fill(heroTint.opacity(0.12))
+                .padding(26)
+            Image(systemName: heroSymbol)
+                .font(.system(size: 62, weight: .regular))
+                .symbolRenderingMode(.hierarchical)
+                .foregroundStyle(heroTint)
+        }
+        .frame(width: 220, height: 220)
+    }
+
+    private var heroText: some View {
+        VStack(spacing: Metrics.tight) {
+            Text(heroTitle)
+                .font(.title3.weight(.semibold))
+                .multilineTextAlignment(.center)
+            Text(heroMessage)
+                .font(.callout)
+                .foregroundStyle(.secondary)
+                .multilineTextAlignment(.center)
+                .frame(maxWidth: 460)
+        }
+    }
+
+    @ViewBuilder
+    private var heroActions: some View {
         switch auth.state {
         case .signedIn:
-            EmptyState(
-                systemImage: "arrow.up.circle",
-                title: "バックアップするファイルを選ぶ",
-                message: "写真や音楽制作のファイルを Dropbox に退避します。複数まとめて選べます。"
-            ) {
-                VStack(spacing: Metrics.block) {
-                    Button {
-                        let urls = FilePicker.selectFiles()
-                        if !urls.isEmpty { coordinator.start(urls: urls) }
-                    } label: {
-                        Label("ファイルを選択", systemImage: "plus")
-                            .frame(minWidth: 150)
-                    }
-                    .buttonStyle(.borderedProminent)
-                    .controlSize(.large)
-                    .keyboardShortcut(.defaultAction)
-
-                    destinationChip
+            VStack(spacing: Metrics.stack) {
+                Button {
+                    let urls = FilePicker.selectFiles()
+                    if !urls.isEmpty { coordinator.start(urls: urls) }
+                } label: {
+                    Text("ファイルを選択")
+                        .font(.headline)
+                        .frame(minWidth: 190)
+                        .padding(.vertical, 5)
                 }
+                .buttonStyle(.borderedProminent)
+                .controlSize(.large)
+                .keyboardShortcut(.defaultAction)
+
+                destinationChip
             }
 
         case .notConfigured:
-            EmptyState(
-                systemImage: "key.slash",
-                title: "Dropbox の App key が未設定です",
-                message: "Dropbox Developer Console で取得した App key を、環境変数か設定ファイルから読み込ませてください。"
-            ) {
-                Button("設定を開く", action: onOpenSettings)
-                    .controlSize(.large)
-            }
+            Button("設定を開く", action: onOpenSettings)
+                .controlSize(.large)
 
         case .authenticating:
-            EmptyState(
-                systemImage: "arrow.triangle.2.circlepath",
-                title: "Dropbox にサインインしています",
-                message: "ブラウザで認証を済ませてください。"
-            ) {
-                ProgressView()
-                    .controlSize(.small)
-            }
+            ProgressView()
+                .controlSize(.small)
 
+        case .signedOut, .needsReauthentication:
+            Button(auth.state.isSignedIn ? "Dropbox に再サインイン" : "Dropbox にサインイン") {
+                Task { await signIn() }
+            }
+            .buttonStyle(.borderedProminent)
+            .controlSize(.large)
+        }
+    }
+
+    private var heroSymbol: String {
+        switch auth.state {
+        case .signedIn: return "arrow.up.circle"
+        case .notConfigured: return "key.slash"
+        case .authenticating: return "arrow.triangle.2.circlepath"
+        case .needsReauthentication: return "exclamationmark.triangle"
+        case .signedOut: return "person.crop.circle.badge.plus"
+        }
+    }
+
+    private var heroTint: Color {
+        switch auth.state {
+        case .notConfigured, .needsReauthentication: return .orange
+        default: return .accentColor
+        }
+    }
+
+    private var heroTitle: String {
+        switch auth.state {
+        case .signedIn: return "バックアップするファイルを選ぶ"
+        case .notConfigured: return "Dropbox の App key が未設定です"
+        case .authenticating: return "Dropbox にサインインしています"
+        case .needsReauthentication: return "再認証が必要です"
+        case .signedOut: return "Dropbox に接続する"
+        }
+    }
+
+    private var heroMessage: String {
+        switch auth.state {
+        case .signedIn:
+            return "写真や音楽制作のファイルを Dropbox に退避します。複数まとめて選べます。"
+        case .notConfigured:
+            return "Dropbox Developer Console で取得した App key を、環境変数か設定ファイルから読み込ませてください。"
+        case .authenticating:
+            return "ブラウザで認証を済ませてください。"
         case .needsReauthentication(let reason):
-            EmptyState(
-                systemImage: "exclamationmark.triangle",
-                title: "再認証が必要です",
-                message: reason
-            ) {
-                Button("Dropbox に再サインイン") { Task { await signIn() } }
-                    .buttonStyle(.borderedProminent)
-                    .controlSize(.large)
-            }
-
+            return reason
         case .signedOut:
-            EmptyState(
-                systemImage: "person.crop.circle.badge.plus",
-                title: "Dropbox に接続する",
-                message: "バックアップ先の Dropbox アカウントにサインインしてください。"
-            ) {
-                Button("Dropbox にサインイン") { Task { await signIn() } }
-                    .buttonStyle(.borderedProminent)
-                    .controlSize(.large)
-            }
+            return "バックアップ先の Dropbox アカウントにサインインしてください。"
         }
     }
 

@@ -2,178 +2,111 @@ import AppKit
 import SwiftUI
 
 /// フェーズ2: ストレージのスキャンと可視化。
+///
+/// 画面の中心に大きなリングを置き、その下に種別ごとの内訳を並べる構成。
 struct StorageScanView: View {
     @EnvironmentObject private var model: StorageScanViewModel
     @State private var highlighted: FileCategory?
 
     var body: some View {
-        VStack(spacing: 0) {
-            toolbar
-            RowDivider()
-            content
-                .frame(maxWidth: .infinity, maxHeight: .infinity)
+        ScrollView {
+            VStack(spacing: Metrics.block) {
+                hero
+                detail
+            }
+            .padding(Metrics.gutter)
+            .frame(maxWidth: 860)
+            .frame(maxWidth: .infinity)
         }
     }
 
-    private var toolbar: some View {
-        HStack(spacing: Metrics.stack) {
-            Button {
-                model.chooseFolderAndScan()
-            } label: {
-                Label("フォルダをスキャン", systemImage: "magnifyingglass")
+    // MARK: - 中央のリング
+
+    private var hero: some View {
+        Card(padding: 24) {
+            VStack(spacing: Metrics.block) {
+                gauge
+                    .frame(width: 260, height: 260)
+
+                caption
+
+                controls
             }
-            .buttonStyle(.borderedProminent)
-            .disabled(model.isScanning)
-
-            if model.lastRoot != nil && !model.isScanning {
-                Button {
-                    model.rescan()
-                } label: {
-                    Label("再スキャン", systemImage: "arrow.clockwise")
-                }
-            }
-
-            Toggle("隠しファイルを含める", isOn: $model.includesHiddenFiles)
-                .toggleStyle(.checkbox)
-                .disabled(model.isScanning)
-
-            Spacer()
-
-            if model.isScanning {
-                Button("中断", role: .cancel) { model.cancel() }
-            }
+            .frame(maxWidth: .infinity)
         }
-        .padding(.horizontal, Metrics.gutter)
-        .padding(.vertical, Metrics.stack)
     }
 
     @ViewBuilder
-    private var content: some View {
+    private var gauge: some View {
         switch model.state {
-        case .idle:
-            EmptyState(
-                systemImage: "chart.pie",
-                title: "使用容量を調べる",
-                message: "フォルダを選ぶと、写真・動画・音楽・書類などの種別ごとに容量を集計します。ホームフォルダ全体は時間がかかるので、まずは「ミュージック」や「ピクチャ」から試すのがおすすめです。"
-            ) {
-                Button {
-                    model.chooseFolderAndScan()
-                } label: {
-                    Label("フォルダを選択", systemImage: "folder")
-                        .frame(minWidth: 150)
-                }
-                .buttonStyle(.borderedProminent)
-                .controlSize(.large)
+        case .finished(let result):
+            RadialGauge(segments: segments(for: result)) {
+                GaugeReadout(
+                    value: ByteFormatting.string(result.totalBytes),
+                    caption: "スキャンした容量",
+                    note: "\(result.fileCount) ファイル"
+                )
             }
 
         case .scanning(let progress):
-            scanning(progress)
-
-        case .failed(let message):
-            EmptyState(
-                systemImage: "exclamationmark.triangle",
-                title: "スキャンできませんでした",
-                message: message
+            RadialGauge(
+                segments: [
+                    .init(id: "scanning", value: 1, color: Color.accentColor.opacity(0.55))
+                ]
             ) {
-                Button("もう一度スキャン") { model.rescan() }
-                    .buttonStyle(.borderedProminent)
-                    .disabled(model.lastRoot == nil)
+                GaugeReadout(
+                    value: ByteFormatting.string(progress.bytesScanned),
+                    caption: "集計中",
+                    note: "\(progress.filesScanned) ファイル"
+                )
             }
+
+        default:
+            // スキャン前でも、ディスク全体の空き具合だけは先に見せる。
+            if let volume = DiskSpace.startupVolume {
+                RadialGauge(
+                    segments: [
+                        .init(id: "used", value: Double(volume.usedBytes), color: .accentColor),
+                        .init(id: "free", value: Double(volume.availableBytes),
+                              color: Palette.border.opacity(0.9))
+                    ]
+                ) {
+                    GaugeReadout(
+                        value: ByteFormatting.string(volume.availableBytes),
+                        caption: "空き容量",
+                        note: "全体 \(ByteFormatting.string(volume.totalBytes))"
+                    )
+                }
+            } else {
+                RadialGauge(
+                    segments: [.init(id: "idle", value: 1, color: Palette.border.opacity(0.9))]
+                ) {
+                    GaugeReadout(value: "—", caption: "未スキャン")
+                }
+            }
+        }
+    }
+
+    @ViewBuilder
+    private var caption: some View {
+        switch model.state {
+        case .idle:
+            Text("フォルダを選ぶと、写真・動画・音楽・書類などの種別ごとに容量を集計します。")
+                .font(.callout)
+                .foregroundStyle(.secondary)
+                .multilineTextAlignment(.center)
+                .frame(maxWidth: 460)
+
+        case .scanning(let progress):
+            Text(progress.currentPath)
+                .font(.caption)
+                .foregroundStyle(.tertiary)
+                .lineLimit(1)
+                .truncationMode(.middle)
+                .frame(maxWidth: 460)
 
         case .finished(let result):
-            results(result)
-        }
-    }
-
-    // MARK: - 走査中
-
-    private func scanning(_ progress: StorageScanner.Progress) -> some View {
-        VStack(alignment: .leading, spacing: Metrics.block) {
-            Card {
-                VStack(alignment: .leading, spacing: Metrics.stack) {
-                    HStack(spacing: Metrics.stack) {
-                        ProgressView()
-                            .controlSize(.small)
-                        Text("集計しています")
-                            .font(.headline)
-                        Spacer()
-                    }
-
-                    // 総数が事前に分からないので、進捗率ではなく実績値を出す。
-                    HStack(spacing: Metrics.block) {
-                        metric("見たファイル", "\(progress.filesScanned)")
-                        metric("合計サイズ", ByteFormatting.string(progress.bytesScanned))
-                    }
-
-                    Text(progress.currentPath)
-                        .font(.caption)
-                        .foregroundStyle(.tertiary)
-                        .lineLimit(1)
-                        .truncationMode(.middle)
-                }
-            }
-            Spacer()
-        }
-        .padding(Metrics.gutter)
-    }
-
-    private func metric(_ label: String, _ value: String) -> some View {
-        VStack(alignment: .leading, spacing: 1) {
-            Text(label)
-                .font(.caption)
-                .foregroundStyle(.secondary)
-            Text(value)
-                .font(.title3.weight(.medium))
-                .monospacedDigit()
-        }
-    }
-
-    // MARK: - 結果
-
-    private func results(_ result: ScanResult) -> some View {
-        ScrollView {
-            VStack(alignment: .leading, spacing: Metrics.block) {
-                headerCard(result)
-
-                if let volume = result.volume {
-                    Card { VolumeCapacityBar(volume: volume) }
-                }
-
-                HStack(alignment: .top, spacing: Metrics.block) {
-                    Card {
-                        CategoryShareChart(usages: result.usages, highlighted: $highlighted)
-                    }
-                    .frame(width: 250)
-
-                    Card {
-                        CategorySizeChart(usages: result.usages, highlighted: $highlighted)
-                    }
-                }
-
-                Card {
-                    VStack(alignment: .leading, spacing: Metrics.stack) {
-                        SectionHeader("内訳", subtitle: "行にポインタを合わせるとグラフ側が強調されます")
-                        CategoryLegendTable(usages: result.usages, highlighted: $highlighted)
-                    }
-                }
-
-                largestFilesCard(result)
-
-                if !result.unreadablePaths.isEmpty {
-                    skippedCard(result)
-                }
-            }
-            .padding(Metrics.gutter)
-        }
-    }
-
-    private func headerCard(_ result: ScanResult) -> some View {
-        Card {
-            VStack(alignment: .leading, spacing: Metrics.tight) {
-                Text(ByteFormatting.string(result.totalBytes))
-                    .font(.system(size: 38, weight: .semibold, design: .rounded))
-                    .monospacedDigit()
-
+            VStack(spacing: Metrics.tight) {
                 HStack(spacing: 6) {
                     Image(systemName: "folder")
                         .symbolRenderingMode(.hierarchical)
@@ -183,15 +116,108 @@ struct StorageScanView: View {
                         .truncationMode(.middle)
                     Text("·")
                         .foregroundStyle(.tertiary)
-                    Text("\(result.fileCount) ファイル")
-                        .monospacedDigit()
+                    Text(result.scannedAt.formatted(date: .abbreviated, time: .shortened))
                         .foregroundStyle(.secondary)
                 }
                 .font(.callout)
 
-                Text(result.scannedAt.formatted(date: .abbreviated, time: .shortened) + " 時点")
-                    .font(.caption)
-                    .foregroundStyle(.tertiary)
+                if let volume = result.volume {
+                    Text("ディスクの空き \(ByteFormatting.string(volume.availableBytes)) / 全体 \(ByteFormatting.string(volume.totalBytes))")
+                        .font(.caption)
+                        .monospacedDigit()
+                        .foregroundStyle(.tertiary)
+                }
+            }
+            .frame(maxWidth: 520)
+
+        case .failed(let message):
+            Label(message, systemImage: "exclamationmark.triangle.fill")
+                .font(.callout)
+                .foregroundStyle(.orange)
+                .multilineTextAlignment(.center)
+                .frame(maxWidth: 460)
+        }
+    }
+
+    @ViewBuilder
+    private var controls: some View {
+        if model.isScanning {
+            VStack(spacing: Metrics.stack) {
+                ProgressView()
+                    .controlSize(.small)
+                Button("中断", role: .cancel) { model.cancel() }
+            }
+        } else {
+            VStack(spacing: Metrics.stack) {
+                Button {
+                    model.chooseFolderAndScan()
+                } label: {
+                    Text(model.result == nil ? "スキャン" : "別のフォルダをスキャン")
+                        .font(.headline)
+                        .frame(minWidth: 190)
+                        .padding(.vertical, 5)
+                }
+                .buttonStyle(.borderedProminent)
+                .controlSize(.large)
+
+                HStack(spacing: Metrics.block) {
+                    if model.lastRoot != nil {
+                        Button {
+                            model.rescan()
+                        } label: {
+                            Label("同じフォルダを再スキャン", systemImage: "arrow.clockwise")
+                        }
+                        .buttonStyle(.link)
+                    }
+                    Toggle("隠しファイルを含める", isOn: $model.includesHiddenFiles)
+                        .toggleStyle(.checkbox)
+                        .font(.callout)
+                }
+                .font(.callout)
+            }
+        }
+    }
+
+    private func segments(for result: ScanResult) -> [RadialGauge.Segment] {
+        // 区間の並びは容量順ではなく固定順にする。並び替えると隣り合う色の
+        // 組み合わせが毎回変わり、見分けにくい並びが出るため。
+        FileCategory.chartOrder.compactMap { category in
+            let usage = result.usage(for: category)
+            guard usage.byteSize > 0 else { return nil }
+            return RadialGauge.Segment(
+                id: category.rawValue,
+                value: Double(usage.byteSize),
+                color: category.chartColor,
+                isDimmed: highlighted != nil && highlighted != category
+            )
+        }
+    }
+
+    // MARK: - リングの下
+
+    @ViewBuilder
+    private var detail: some View {
+        if let result = model.result {
+            breakdownCard(result)
+            largestFilesCard(result)
+            if !result.unreadablePaths.isEmpty {
+                skippedCard(result)
+            }
+        } else if case .idle = model.state {
+            hints
+        }
+    }
+
+    private func breakdownCard(_ result: ScanResult) -> some View {
+        Card(padding: 0) {
+            VStack(alignment: .leading, spacing: 0) {
+                SectionHeader("内訳", subtitle: "行にポインタを合わせるとリングが強調されます")
+                    .padding(.horizontal, Metrics.cardPadding)
+                    .padding(.top, Metrics.cardPadding)
+                    .padding(.bottom, Metrics.tight)
+
+                CategoryBreakdownList(usages: result.usages, highlighted: $highlighted)
+                    .padding(.bottom, Metrics.tight)
             }
         }
     }
@@ -209,22 +235,32 @@ struct StorageScanView: View {
 
                 let files = Array(result.largestFiles.prefix(20))
                 ForEach(files) { file in
-                    FileRow(
-                        systemImage: file.category.symbolName,
-                        name: file.fileName,
-                        detail: file.parentPath,
-                        symbolTint: file.category.chartColor
-                    ) {
-                        MonoText(ByteFormatting.string(file.byteSize))
+                    HStack(spacing: Metrics.stack) {
+                        CategoryBadge(category: file.category, size: 28)
+                        VStack(alignment: .leading, spacing: 2) {
+                            Text(file.fileName)
+                                .lineLimit(1)
+                                .truncationMode(.middle)
+                            Text(file.parentPath)
+                                .font(.caption)
+                                .foregroundStyle(.secondary)
+                                .lineLimit(1)
+                                .truncationMode(.middle)
+                        }
+                        Spacer(minLength: Metrics.stack)
+                        Text(ByteFormatting.string(file.byteSize))
+                            .monospacedDigit()
+                            .foregroundStyle(.secondary)
                     }
                     .padding(.horizontal, Metrics.cardPadding)
+                    .padding(.vertical, 8)
                     .contentShape(Rectangle())
                     .onTapGesture {
                         NSWorkspace.shared.activateFileViewerSelecting([file.url])
                     }
 
                     if file.id != files.last?.id {
-                        RowDivider().padding(.leading, Metrics.cardPadding + 30)
+                        RowDivider().padding(.leading, 52)
                     }
                 }
                 .padding(.bottom, Metrics.tight)
@@ -247,6 +283,34 @@ struct StorageScanView: View {
                         .truncationMode(.middle)
                 }
             }
+        }
+    }
+
+    /// スキャン前の案内。どこから見るとよいかを示す。
+    private var hints: some View {
+        Card {
+            VStack(alignment: .leading, spacing: Metrics.stack) {
+                SectionHeader("どこから見る？")
+                hint("music.note", "ミュージック", "音楽制作のプロジェクトは 1 つで数 GB になりがちです")
+                hint("photo", "ピクチャ", "写真ライブラリは種別ごとの内訳が効きます")
+                hint("arrow.down.circle", "ダウンロード", "使い終わったインストーラや書き出しが溜まりがちです")
+            }
+        }
+    }
+
+    private func hint(_ symbol: String, _ title: String, _ detail: String) -> some View {
+        HStack(spacing: Metrics.stack) {
+            Image(systemName: symbol)
+                .symbolRenderingMode(.hierarchical)
+                .foregroundStyle(Color.accentColor)
+                .frame(width: 22)
+            VStack(alignment: .leading, spacing: 1) {
+                Text(title)
+                Text(detail)
+                    .font(.caption)
+                    .foregroundStyle(.secondary)
+            }
+            Spacer(minLength: 0)
         }
     }
 }
