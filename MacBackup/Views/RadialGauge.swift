@@ -1,20 +1,23 @@
 import SwiftUI
 
+/// リングを構成する区間。値は合計で正規化して描くので、比率でも実数でもよい。
+///
+/// ジェネリックな `RadialGauge` の入れ子にすると参照のたびに型引数が要るため、
+/// トップレベルの型にしてある。
+struct GaugeSegment: Identifiable {
+    let id: String
+    let value: Double
+    let color: Color
+    /// 強調表示から外れているとき薄くする。
+    var isDimmed: Bool = false
+}
+
 /// 中央に大きく数値を出すリング型のゲージ。
 ///
 /// Swift Charts の `SectorMark` は macOS 14 以降でしか使えないため、
 /// 円は自前で描いている。おかげで macOS 13 でも同じ見た目になる。
 struct RadialGauge<Center: View>: View {
-    /// リングを構成する区間。合計が 1.0 になるよう正規化して描く。
-    struct Segment: Identifiable {
-        let id: String
-        let value: Double
-        let color: Color
-        /// 強調表示から外れているとき薄くする。
-        var isDimmed: Bool = false
-    }
-
-    let segments: [Segment]
+    let segments: [GaugeSegment]
     var lineWidth: CGFloat = 26
     /// 区間の間に開ける隙間（角度）。
     var gapDegrees: Double = 2.2
@@ -49,8 +52,8 @@ struct RadialGauge<Center: View>: View {
     }
 
     /// 各区間の開始・終了位置（0.0〜1.0）。隙間のぶんだけ末尾を詰める。
-    private var offsets: [(segment: Segment, start: CGFloat, end: CGFloat)] {
-        var result: [(Segment, CGFloat, CGFloat)] = []
+    private var offsets: [(segment: GaugeSegment, start: CGFloat, end: CGFloat)] {
+        var result: [(GaugeSegment, CGFloat, CGFloat)] = []
         var cursor: Double = 0
         let gap = gapDegrees / 360
 
@@ -67,7 +70,7 @@ struct RadialGauge<Center: View>: View {
 }
 
 extension RadialGauge where Center == EmptyView {
-    init(segments: [Segment], lineWidth: CGFloat = 26, gapDegrees: Double = 2.2) {
+    init(segments: [GaugeSegment], lineWidth: CGFloat = 26, gapDegrees: Double = 2.2) {
         self.init(segments: segments, lineWidth: lineWidth, gapDegrees: gapDegrees) { EmptyView() }
     }
 }

@@ -92,8 +92,8 @@ struct BackupResultsView: View {
     }
 
     /// 成功・失敗・スキップの件数をそのままリングの比率にする。
-    private var outcomeSegments: [RadialGauge.Segment] {
-        var segments: [RadialGauge.Segment] = []
+    private var outcomeSegments: [GaugeSegment] {
+        var segments: [GaugeSegment] = []
         if !coordinator.successfulItems.isEmpty {
             segments.append(.init(id: "ok", value: Double(coordinator.successfulItems.count), color: .green))
         }

@@ -178,13 +178,13 @@ struct StorageScanView: View {
         }
     }
 
-    private func segments(for result: ScanResult) -> [RadialGauge.Segment] {
+    private func segments(for result: ScanResult) -> [GaugeSegment] {
         // 区間の並びは容量順ではなく固定順にする。並び替えると隣り合う色の
         // 組み合わせが毎回変わり、見分けにくい並びが出るため。
         FileCategory.chartOrder.compactMap { category in
             let usage = result.usage(for: category)
             guard usage.byteSize > 0 else { return nil }
-            return RadialGauge.Segment(
+            return GaugeSegment(
                 id: category.rawValue,
                 value: Double(usage.byteSize),
                 color: category.chartColor,
