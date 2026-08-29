@@ -15,6 +15,7 @@
 		65F45D5C36AA4D7A4E8FF80B /* LocalFileRemover.swift in Sources */ = {isa = PBXBuildFile; fileRef = 6AD7FC9F7DEA0267BE45DB51 /* LocalFileRemover.swift */; };
 		3F6BF860DDAFBE276BD8E282 /* FileCategory.swift in Sources */ = {isa = PBXBuildFile; fileRef = 76505C2A7937A0B666C2CCE4 /* FileCategory.swift */; };
 		7B52110E4A6B690AD1FF5A07 /* AppConfig.swift in Sources */ = {isa = PBXBuildFile; fileRef = D9F6F4CC09663E43F23B1D09 /* AppConfig.swift */; };
+		984CCBBEC64012BE2851A2C1 /* DemoContent.swift in Sources */ = {isa = PBXBuildFile; fileRef = ABA740EE732961A62CAE1F91 /* DemoContent.swift */; };
 		F7517DD9CCD4214AE946F5C9 /* DropboxAPIClient.swift in Sources */ = {isa = PBXBuildFile; fileRef = BA33042C49A5B552491C310D /* DropboxAPIClient.swift */; };
 		A586E4A0285FE39AF3FD8858 /* DropboxError.swift in Sources */ = {isa = PBXBuildFile; fileRef = 6345DDC418D11FBB5F77271B /* DropboxError.swift */; };
 		26074D42C97878177FBB2117 /* UploadProgressDelegate.swift in Sources */ = {isa = PBXBuildFile; fileRef = 610CC494EEFDE041F37D7DE6 /* UploadProgressDelegate.swift */; };
@@ -48,6 +49,7 @@
 		6AD7FC9F7DEA0267BE45DB51 /* LocalFileRemover.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "LocalFileRemover.swift"; sourceTree = "<group>"; };
 		76505C2A7937A0B666C2CCE4 /* FileCategory.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "FileCategory.swift"; sourceTree = "<group>"; };
 		D9F6F4CC09663E43F23B1D09 /* AppConfig.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "AppConfig.swift"; sourceTree = "<group>"; };
+		ABA740EE732961A62CAE1F91 /* DemoContent.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "DemoContent.swift"; sourceTree = "<group>"; };
 		BA33042C49A5B552491C310D /* DropboxAPIClient.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "DropboxAPIClient.swift"; sourceTree = "<group>"; };
 		6345DDC418D11FBB5F77271B /* DropboxError.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "DropboxError.swift"; sourceTree = "<group>"; };
 		610CC494EEFDE041F37D7DE6 /* UploadProgressDelegate.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "UploadProgressDelegate.swift"; sourceTree = "<group>"; };
@@ -92,6 +94,7 @@
 				5C89BFADBE7A62271469DC12 /* Backup */,
 				B051D1DED4E886D83A3FA5BC /* Classification */,
 				6A84B771117995B310523560 /* Config */,
+				A79D3125DA9D031A87D30B5E /* Demo */,
 				367F763E09F40EEEA27323CF /* Networking */,
 				DD8E90A4851C5485947FA534 /* Resources */,
 				2AADD817EAA12D9CA2660E3E /* Scanning */,
@@ -136,6 +139,14 @@
 				35A0AF27CAFF34AE55DC21A0 /* DropboxConfig.example.plist */,
 			);
 			path = "Config";
+			sourceTree = "<group>";
+		};
+		A79D3125DA9D031A87D30B5E /* Demo */ = {
+			isa = PBXGroup;
+			children = (
+				ABA740EE732961A62CAE1F91 /* DemoContent.swift */,
+			);
+			path = "Demo";
 			sourceTree = "<group>";
 		};
 		367F763E09F40EEEA27323CF /* Networking */ = {
@@ -289,6 +300,7 @@
 				65F45D5C36AA4D7A4E8FF80B /* LocalFileRemover.swift in Sources */,
 				3F6BF860DDAFBE276BD8E282 /* FileCategory.swift in Sources */,
 				7B52110E4A6B690AD1FF5A07 /* AppConfig.swift in Sources */,
+				984CCBBEC64012BE2851A2C1 /* DemoContent.swift in Sources */,
 				F7517DD9CCD4214AE946F5C9 /* DropboxAPIClient.swift in Sources */,
 				A586E4A0285FE39AF3FD8858 /* DropboxError.swift in Sources */,
 				26074D42C97878177FBB2117 /* UploadProgressDelegate.swift in Sources */,

@@ -108,23 +108,37 @@ struct BackupView: View {
                 .keyboardShortcut(.defaultAction)
 
                 destinationChip
+                demoLink
             }
 
         case .notConfigured:
-            Button("設定を開く", action: onOpenSettings)
-                .controlSize(.large)
+            VStack(spacing: Metrics.stack) {
+                Button("設定を開く", action: onOpenSettings)
+                    .controlSize(.large)
+                demoLink
+            }
 
         case .authenticating:
             ProgressView()
                 .controlSize(.small)
 
         case .signedOut, .needsReauthentication:
-            Button(auth.state.isSignedIn ? "Dropbox に再サインイン" : "Dropbox にサインイン") {
-                Task { await signIn() }
+            VStack(spacing: Metrics.stack) {
+                Button(auth.state.isSignedIn ? "Dropbox に再サインイン" : "Dropbox にサインイン") {
+                    Task { await signIn() }
+                }
+                .buttonStyle(.borderedProminent)
+                .controlSize(.large)
+                demoLink
             }
-            .buttonStyle(.borderedProminent)
-            .controlSize(.large)
         }
+    }
+
+    /// Dropbox に繋がなくても画面を確認できるようにする入口。
+    private var demoLink: some View {
+        Button("サンプルデータで試す") { coordinator.startDemo() }
+            .buttonStyle(.link)
+            .font(.callout)
     }
 
     private var heroSymbol: String {

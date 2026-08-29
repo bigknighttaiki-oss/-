@@ -161,6 +161,11 @@ struct StorageScanView: View {
                 .controlSize(.large)
 
                 HStack(spacing: Metrics.block) {
+                    // フォルダを選ばなくても結果画面を確認できるようにする入口。
+                    if model.result == nil {
+                        Button("サンプルデータで試す") { model.startDemo() }
+                            .buttonStyle(.link)
+                    }
                     if model.lastRoot != nil {
                         Button {
                             model.rescan()

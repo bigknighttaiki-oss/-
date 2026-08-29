@@ -19,6 +19,8 @@ final class BackupCoordinator: ObservableObject {
     /// ゴミ箱への移動結果。
     @Published private(set) var trashOutcomes: [LocalFileRemover.Outcome] = []
     @Published var remoteFolder: String = AppConfig.defaultRemoteFolder
+    /// デモ表示中かどうか。true の間はネットワークにもディスクにも触れない。
+    @Published private(set) var isDemoSession = false
 
     private let client: DropboxAPIClient
     private let auth: DropboxAuthService
@@ -73,10 +75,62 @@ final class BackupCoordinator: ObservableObject {
         run(itemIDs: items.map(\.id))
     }
 
+    /// サンプルデータでアップロードの流れを再現する。
+    ///
+    /// Dropbox には接続せず、ローカルのファイルも読まない。成功・リネーム・失敗・
+    /// スキップが一通り出るようにしてあるので、結果画面の見た目をひと通り確認できる。
+    func startDemo() {
+        uploadTask?.cancel()
+        isDemoSession = true
+        items = DemoContent.backupItems
+        trashOutcomes = []
+        authenticationErrorMessage = nil
+        phase = .uploading
+
+        uploadTask = Task { [self] in
+            for (index, item) in items.enumerated() {
+                if Task.isCancelled { return }
+                currentItemID = item.id
+
+                // 3 番目は失敗、4 番目はスキップにして、結果画面の全パターンを出す。
+                if index == 2 {
+                    update(item.id) { $0.status = .failed(message: DemoContent.failureMessage, retryable: true) }
+                    try? await Task.sleep(nanoseconds: 400_000_000)
+                    continue
+                }
+                if index == 3 {
+                    update(item.id) { $0.status = .skipped(reason: DemoContent.skipReason) }
+                    try? await Task.sleep(nanoseconds: 300_000_000)
+                    continue
+                }
+
+                for step in stride(from: 0.0, through: 1.0, by: 0.05) {
+                    if Task.isCancelled { return }
+                    update(item.id) { $0.status = .uploading(progress: step) }
+                    try? await Task.sleep(nanoseconds: 60_000_000)
+                }
+                // 1 番目は同名衝突で Dropbox 側にリネームされたことにする。
+                let metadata = DemoContent.metadata(for: item, renamed: index == 0)
+                update(item.id) { $0.status = .succeeded(metadata: metadata) }
+            }
+            currentItemID = nil
+            phase = .review
+            uploadTask = nil
+        }
+    }
+
     /// 失敗したファイルだけを再送する。自動リトライはせず、ユーザーの操作で呼ばれる。
     func retryFailed() {
         let ids = failedItems.map(\.id)
         guard !ids.isEmpty else { return }
+        if isDemoSession {
+            // デモではネットワークに出ないので、そのまま成功したことにする。
+            for id in ids {
+                guard let item = items.first(where: { $0.id == id }) else { continue }
+                update(id) { $0.status = .succeeded(metadata: DemoContent.metadata(for: item, renamed: false)) }
+            }
+            return
+        }
         for id in ids { update(id) { $0.status = .pending } }
         run(itemIDs: ids)
     }
@@ -171,11 +225,15 @@ final class BackupCoordinator: ObservableObject {
     }
 
     /// 削除マークの付いたファイルをゴミ箱へ移動する（完全削除はしない）。
+    ///
+    /// デモ表示中は実際のファイルには一切触れず、結果だけを再現する。
     @discardableResult
     func trashMarkedFiles() -> [LocalFileRemover.Outcome] {
         let targets = itemsMarkedForDeletion
         guard !targets.isEmpty else { return [] }
-        let outcomes = remover.moveToTrash(targets.map(\.url))
+        let outcomes = isDemoSession
+            ? targets.map { LocalFileRemover.Outcome(url: $0.url, trashedURL: nil, errorMessage: nil) }
+            : remover.moveToTrash(targets.map(\.url))
         trashOutcomes = outcomes
         for (item, outcome) in zip(targets, outcomes) where outcome.didSucceed {
             update(item.id) { $0.isMarkedForDeletion = false }
@@ -191,6 +249,7 @@ final class BackupCoordinator: ObservableObject {
         trashOutcomes = []
         currentItemID = nil
         authenticationErrorMessage = nil
+        isDemoSession = false
         phase = .idle
     }
 

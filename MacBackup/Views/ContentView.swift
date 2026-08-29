@@ -4,6 +4,7 @@ import SwiftUI
 struct ContentView: View {
     @EnvironmentObject private var auth: DropboxAuthService
     @EnvironmentObject private var coordinator: BackupCoordinator
+    @EnvironmentObject private var scanModel: StorageScanViewModel
 
     enum Feature: String, CaseIterable, Identifiable {
         case backup
@@ -68,7 +69,10 @@ struct ContentView: View {
                     .frame(maxWidth: .infinity, alignment: .leading)
             }
         } detail: {
-            Group {
+            VStack(spacing: 0) {
+                if isDemo {
+                    demoBanner
+                }
                 switch current {
                 case .backup:
                     BackupView(onOpenSettings: { isShowingSettings = true })

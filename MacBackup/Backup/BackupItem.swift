@@ -62,6 +62,15 @@ struct BackupItem: Identifiable, Equatable {
         self.isMarkedForDeletion = false
     }
 
+    /// デモ表示用。ディスク上に無いファイルでも、サイズを指定して組み立てられる。
+    init(demoURL: URL, byteSize: Int64) {
+        self.id = UUID()
+        self.url = demoURL
+        self.byteSize = byteSize
+        self.status = .pending
+        self.isMarkedForDeletion = false
+    }
+
     var fileName: String { url.lastPathComponent }
 
     /// フェーズ2 のスキャン機能で使う分類。ここでは結果一覧のアイコン表示に使う。

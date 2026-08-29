@@ -16,6 +16,8 @@ final class StorageScanViewModel: ObservableObject {
     @Published var includesHiddenFiles: Bool = false
     /// 直近にスキャンしたフォルダ。再スキャンに使う。
     @Published private(set) var lastRoot: URL?
+    /// デモ表示中かどうか。true の間はディスクを走査しない。
+    @Published private(set) var isDemoSession = false
 
     private var scanTask: Task<Void, Never>?
 
@@ -27,6 +29,34 @@ final class StorageScanViewModel: ObservableObject {
     var isScanning: Bool {
         if case .scanning = state { return true }
         return false
+    }
+
+    /// サンプルデータでスキャンの流れを再現する。
+    ///
+    /// 実際のフォルダは走査しないので、フォルダを選ばなくても結果画面を確認できる。
+    func startDemo() {
+        scanTask?.cancel()
+        isDemoSession = true
+        lastRoot = nil
+        state = .scanning(StorageScanner.Progress(currentPath: DemoContent.scanningPaths[0]))
+
+        let result = DemoContent.scanResult
+        scanTask = Task { [self] in
+            let steps = 16
+            for step in 1...steps {
+                if Task.isCancelled { return }
+                let ratio = Double(step) / Double(steps)
+                state = .scanning(StorageScanner.Progress(
+                    filesScanned: Int(Double(result.fileCount) * ratio),
+                    bytesScanned: Int64(Double(result.totalBytes) * ratio),
+                    currentPath: DemoContent.scanningPaths[step % DemoContent.scanningPaths.count]
+                ))
+                try? await Task.sleep(nanoseconds: 120_000_000)
+            }
+            if Task.isCancelled { return }
+            state = .finished(result)
+            scanTask = nil
+        }
     }
 
     /// フォルダを選んでスキャンする。
@@ -43,6 +73,7 @@ final class StorageScanViewModel: ObservableObject {
 
     func scan(root: URL) {
         scanTask?.cancel()
+        isDemoSession = false
         lastRoot = root
         state = .scanning(StorageScanner.Progress(currentPath: root.path))
 
@@ -88,6 +119,7 @@ final class StorageScanViewModel: ObservableObject {
     func cancel() {
         scanTask?.cancel()
         scanTask = nil
+        isDemoSession = false
         state = .idle
     }
 
