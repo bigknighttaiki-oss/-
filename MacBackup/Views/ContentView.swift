@@ -101,6 +101,35 @@ struct ContentView: View {
                 .environmentObject(coordinator)
         }
     }
+
+    private var isDemo: Bool { coordinator.isDemoSession || scanModel.isDemoSession }
+
+    /// デモ表示中であることを常に見えるようにする。
+    /// 数字をうっかり本物と取り違えないよう、画面の上端に出しっぱなしにする。
+    private var demoBanner: some View {
+        HStack(spacing: Metrics.stack) {
+            Image(systemName: "theatermasks")
+                .symbolRenderingMode(.hierarchical)
+                .foregroundStyle(.orange)
+            VStack(alignment: .leading, spacing: 1) {
+                Text("デモ表示中")
+                    .font(.callout.weight(.medium))
+                Text("サンプルデータです。実際のファイルにも Dropbox にも触れていません。")
+                    .font(.caption)
+                    .foregroundStyle(.secondary)
+            }
+            Spacer(minLength: 0)
+            Button("デモを終了") {
+                coordinator.reset()
+                scanModel.reset()
+            }
+            .controlSize(.small)
+        }
+        .padding(.horizontal, Metrics.gutter)
+        .padding(.vertical, Metrics.stack)
+        .background(Color.orange.opacity(0.14))
+        .overlay(alignment: .bottom) { RowDivider() }
+    }
 }
 
 /// Dropbox 連携状態。色に加えて記号と文言でも状態が分かるようにする。
