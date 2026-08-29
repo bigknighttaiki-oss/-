@@ -1,0 +1,13 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
+<plist version="1.0">
+<dict>
+	<!-- Dropbox Developer Console (https://www.dropbox.com/developers/apps) で
+	     アプリを作成し、App key をここに貼る。App secret は不要（PKCE を使うため）。
+	     このファイルを DropboxConfig.plist にリネームして
+	     ~/Library/Application Support/MacBackup/ に置くか、
+	     Xcode のターゲットに追加してバンドルに同梱する。 -->
+	<key>AppKey</key>
+	<string>YOUR_DROPBOX_APP_KEY</string>
+</dict>
+</plist>

@@ -1,0 +1,18 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
+<plist version="1.0">
+<dict>
+	<!-- 個人用のローカルビルド。サンドボックスは有効のままにし、
+	     必要な権限だけを開ける。サンドボックスを切りたい場合は
+	     com.apple.security.app-sandbox を false にする。 -->
+	<key>com.apple.security.app-sandbox</key>
+	<true/>
+	<!-- Dropbox API との通信、および OAuth のブラウザ表示に必要。 -->
+	<key>com.apple.security.network.client</key>
+	<true/>
+	<!-- NSOpenPanel でユーザーが選んだファイルの読み書き。
+	     ゴミ箱への移動には書き込み権限が要るため read-write にしている。 -->
+	<key>com.apple.security.files.user-selected.read-write</key>
+	<true/>
+</dict>
+</plist>

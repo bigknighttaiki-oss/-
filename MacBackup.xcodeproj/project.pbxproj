@@ -1,0 +1,434 @@
+// !$*UTF8*$!
+{
+	archiveVersion = 1;
+	classes = {
+	};
+	objectVersion = 56;
+	objects = {
+
+/* Begin PBXBuildFile section */
+		342BADB1E6A6C532A7613CA9 /* MacBackupApp.swift in Sources */ = {isa = PBXBuildFile; fileRef = 519886215FF8A5437DA6ABB6 /* MacBackupApp.swift */; };
+		E530B2113935407D310EB14E /* DropboxAuthService.swift in Sources */ = {isa = PBXBuildFile; fileRef = 77DF7D58B9E9D7267DA7E724 /* DropboxAuthService.swift */; };
+		4FB3EE4430134380084C67DA /* DropboxCredentials.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4A8A55026FA8F44D3F914F74 /* DropboxCredentials.swift */; };
+		44675F8D893796F22E20C7C7 /* BackupCoordinator.swift in Sources */ = {isa = PBXBuildFile; fileRef = 7497119E0CB6E7B71B0C2793 /* BackupCoordinator.swift */; };
+		41DC20D6F6BA40E0FBE83C46 /* BackupItem.swift in Sources */ = {isa = PBXBuildFile; fileRef = 93B5A1E526DE0BB55141D7AE /* BackupItem.swift */; };
+		65F45D5C36AA4D7A4E8FF80B /* LocalFileRemover.swift in Sources */ = {isa = PBXBuildFile; fileRef = 6AD7FC9F7DEA0267BE45DB51 /* LocalFileRemover.swift */; };
+		3F6BF860DDAFBE276BD8E282 /* FileCategory.swift in Sources */ = {isa = PBXBuildFile; fileRef = 76505C2A7937A0B666C2CCE4 /* FileCategory.swift */; };
+		7B52110E4A6B690AD1FF5A07 /* AppConfig.swift in Sources */ = {isa = PBXBuildFile; fileRef = D9F6F4CC09663E43F23B1D09 /* AppConfig.swift */; };
+		984CCBBEC64012BE2851A2C1 /* DemoContent.swift in Sources */ = {isa = PBXBuildFile; fileRef = ABA740EE732961A62CAE1F91 /* DemoContent.swift */; };
+		F7517DD9CCD4214AE946F5C9 /* DropboxAPIClient.swift in Sources */ = {isa = PBXBuildFile; fileRef = BA33042C49A5B552491C310D /* DropboxAPIClient.swift */; };
+		A586E4A0285FE39AF3FD8858 /* DropboxError.swift in Sources */ = {isa = PBXBuildFile; fileRef = 6345DDC418D11FBB5F77271B /* DropboxError.swift */; };
+		26074D42C97878177FBB2117 /* UploadProgressDelegate.swift in Sources */ = {isa = PBXBuildFile; fileRef = 610CC494EEFDE041F37D7DE6 /* UploadProgressDelegate.swift */; };
+		6E2D9D4C8B820B8B3243079D /* DiskSpace.swift in Sources */ = {isa = PBXBuildFile; fileRef = F53F3CF6BFF2F0A4852F4BD6 /* DiskSpace.swift */; };
+		6C9419BE6BF27E464F1667A9 /* ScanResult.swift in Sources */ = {isa = PBXBuildFile; fileRef = AE41505CBC1872E248C8DB5F /* ScanResult.swift */; };
+		AB89B7693878BC49983DCF92 /* StorageScanViewModel.swift in Sources */ = {isa = PBXBuildFile; fileRef = A99EBC401F4EC92B10A791E3 /* StorageScanViewModel.swift */; };
+		4CBCD900A36C8F00AE978AB1 /* StorageScanner.swift in Sources */ = {isa = PBXBuildFile; fileRef = A94B9839085FD1FB7C820045 /* StorageScanner.swift */; };
+		5E4E773A35A2BAA5AD8953B7 /* KeychainStore.swift in Sources */ = {isa = PBXBuildFile; fileRef = 9908910980FFB77907C93650 /* KeychainStore.swift */; };
+		4F3F872290E75E368EA3D44A /* BackupResultsView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 664F00C1BD13FC487EDE638B /* BackupResultsView.swift */; };
+		035016D416E0EB6D1535A9FB /* BackupView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 0848A4C24B0B7FB789CD2EDD /* BackupView.swift */; };
+		70B393AB1CE552B1BBFCEA3A /* ByteFormatting.swift in Sources */ = {isa = PBXBuildFile; fileRef = 50853FCD4BD2AAD1895E9A9C /* ByteFormatting.swift */; };
+		A2AB914B2E0FF0AF3AF64580 /* CategoryBreakdownList.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8F5B2DA3E04FCB76F07363CE /* CategoryBreakdownList.swift */; };
+		8C60E728961A6403EA763106 /* ContentView.swift in Sources */ = {isa = PBXBuildFile; fileRef = C7C1391615510282CBD1ADE2 /* ContentView.swift */; };
+		7D5CFBFC199A2868E8EACF84 /* DeletionConfirmationView.swift in Sources */ = {isa = PBXBuildFile; fileRef = ACE87FDC95DAE992E02D4CAF /* DeletionConfirmationView.swift */; };
+		B504DE67B54E4FF12DE3E59E /* DesignSystem.swift in Sources */ = {isa = PBXBuildFile; fileRef = F4A134566491AA9D0B57F345 /* DesignSystem.swift */; };
+		DB5D0C1CC70B039D1B2E96FA /* FileCategory+Chart.swift in Sources */ = {isa = PBXBuildFile; fileRef = FD770AB7737A98F4B389D04A /* FileCategory+Chart.swift */; };
+		FB5A820F158A2D7DE185A040 /* FilePicker.swift in Sources */ = {isa = PBXBuildFile; fileRef = D6F4E957247B306AE281FD1A /* FilePicker.swift */; };
+		C9F4999713BA52B57B235022 /* RadialGauge.swift in Sources */ = {isa = PBXBuildFile; fileRef = D2AAFE2AB2B1BE68561C0ED9 /* RadialGauge.swift */; };
+		AB28432DB78DFCAB50F562E1 /* SettingsView.swift in Sources */ = {isa = PBXBuildFile; fileRef = AAC6525AC7C4ED5DDFCDBCF2 /* SettingsView.swift */; };
+		F144EECFE0ACB19DA0894DF7 /* StorageScanView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 355344D4A2715D9FC7154D0E /* StorageScanView.swift */; };
+		241FA7EDF9F692F7AE1D8986 /* UploadProgressView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 2E26ED12C0E5FB04E7FE0872 /* UploadProgressView.swift */; };
+/* End PBXBuildFile section */
+
+/* Begin PBXFileReference section */
+		F5BF48AA40CAD7891EB709FC /* MacBackup.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = "MacBackup.app"; sourceTree = BUILT_PRODUCTS_DIR; };
+		519886215FF8A5437DA6ABB6 /* MacBackupApp.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "MacBackupApp.swift"; sourceTree = "<group>"; };
+		77DF7D58B9E9D7267DA7E724 /* DropboxAuthService.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "DropboxAuthService.swift"; sourceTree = "<group>"; };
+		4A8A55026FA8F44D3F914F74 /* DropboxCredentials.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "DropboxCredentials.swift"; sourceTree = "<group>"; };
+		7497119E0CB6E7B71B0C2793 /* BackupCoordinator.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "BackupCoordinator.swift"; sourceTree = "<group>"; };
+		93B5A1E526DE0BB55141D7AE /* BackupItem.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "BackupItem.swift"; sourceTree = "<group>"; };
+		6AD7FC9F7DEA0267BE45DB51 /* LocalFileRemover.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "LocalFileRemover.swift"; sourceTree = "<group>"; };
+		76505C2A7937A0B666C2CCE4 /* FileCategory.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "FileCategory.swift"; sourceTree = "<group>"; };
+		D9F6F4CC09663E43F23B1D09 /* AppConfig.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "AppConfig.swift"; sourceTree = "<group>"; };
+		ABA740EE732961A62CAE1F91 /* DemoContent.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "DemoContent.swift"; sourceTree = "<group>"; };
+		BA33042C49A5B552491C310D /* DropboxAPIClient.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "DropboxAPIClient.swift"; sourceTree = "<group>"; };
+		6345DDC418D11FBB5F77271B /* DropboxError.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "DropboxError.swift"; sourceTree = "<group>"; };
+		610CC494EEFDE041F37D7DE6 /* UploadProgressDelegate.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "UploadProgressDelegate.swift"; sourceTree = "<group>"; };
+		F53F3CF6BFF2F0A4852F4BD6 /* DiskSpace.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "DiskSpace.swift"; sourceTree = "<group>"; };
+		AE41505CBC1872E248C8DB5F /* ScanResult.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "ScanResult.swift"; sourceTree = "<group>"; };
+		A99EBC401F4EC92B10A791E3 /* StorageScanViewModel.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "StorageScanViewModel.swift"; sourceTree = "<group>"; };
+		A94B9839085FD1FB7C820045 /* StorageScanner.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "StorageScanner.swift"; sourceTree = "<group>"; };
+		9908910980FFB77907C93650 /* KeychainStore.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "KeychainStore.swift"; sourceTree = "<group>"; };
+		664F00C1BD13FC487EDE638B /* BackupResultsView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "BackupResultsView.swift"; sourceTree = "<group>"; };
+		0848A4C24B0B7FB789CD2EDD /* BackupView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "BackupView.swift"; sourceTree = "<group>"; };
+		50853FCD4BD2AAD1895E9A9C /* ByteFormatting.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "ByteFormatting.swift"; sourceTree = "<group>"; };
+		8F5B2DA3E04FCB76F07363CE /* CategoryBreakdownList.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "CategoryBreakdownList.swift"; sourceTree = "<group>"; };
+		C7C1391615510282CBD1ADE2 /* ContentView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "ContentView.swift"; sourceTree = "<group>"; };
+		ACE87FDC95DAE992E02D4CAF /* DeletionConfirmationView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "DeletionConfirmationView.swift"; sourceTree = "<group>"; };
+		F4A134566491AA9D0B57F345 /* DesignSystem.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "DesignSystem.swift"; sourceTree = "<group>"; };
+		FD770AB7737A98F4B389D04A /* FileCategory+Chart.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "FileCategory+Chart.swift"; sourceTree = "<group>"; };
+		D6F4E957247B306AE281FD1A /* FilePicker.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "FilePicker.swift"; sourceTree = "<group>"; };
+		D2AAFE2AB2B1BE68561C0ED9 /* RadialGauge.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "RadialGauge.swift"; sourceTree = "<group>"; };
+		AAC6525AC7C4ED5DDFCDBCF2 /* SettingsView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "SettingsView.swift"; sourceTree = "<group>"; };
+		355344D4A2715D9FC7154D0E /* StorageScanView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "StorageScanView.swift"; sourceTree = "<group>"; };
+		2E26ED12C0E5FB04E7FE0872 /* UploadProgressView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "UploadProgressView.swift"; sourceTree = "<group>"; };
+		35A0AF27CAFF34AE55DC21A0 /* DropboxConfig.example.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = "DropboxConfig.example.plist"; sourceTree = "<group>"; };
+		A429B695B07084FD5AFE9EB9 /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = "Info.plist"; sourceTree = "<group>"; };
+		BB43B0DE4DC48A6D97D46BF4 /* MacBackup.entitlements */ = {isa = PBXFileReference; lastKnownFileType = text.plist.entitlements; path = "MacBackup.entitlements"; sourceTree = "<group>"; };
+/* End PBXFileReference section */
+
+/* Begin PBXFrameworksBuildPhase section */
+		4F6F5CC3FCCF73F75AE9CCF4 /* Frameworks */ = {
+			isa = PBXFrameworksBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+/* End PBXFrameworksBuildPhase section */
+
+/* Begin PBXGroup section */
+		60E67A0B292757537D5BA244 /* MacBackup */ = {
+			isa = PBXGroup;
+			children = (
+				EDE96ADBF3FBA5A4B50485A4 /* Auth */,
+				5C89BFADBE7A62271469DC12 /* Backup */,
+				B051D1DED4E886D83A3FA5BC /* Classification */,
+				6A84B771117995B310523560 /* Config */,
+				A79D3125DA9D031A87D30B5E /* Demo */,
+				367F763E09F40EEEA27323CF /* Networking */,
+				DD8E90A4851C5485947FA534 /* Resources */,
+				2AADD817EAA12D9CA2660E3E /* Scanning */,
+				CA98E1D3BCB4542D3729236D /* Security */,
+				3E2A3017B8357B7785F8D2E8 /* Views */,
+				519886215FF8A5437DA6ABB6 /* MacBackupApp.swift */,
+			);
+			path = "MacBackup";
+			sourceTree = "<group>";
+		};
+		EDE96ADBF3FBA5A4B50485A4 /* Auth */ = {
+			isa = PBXGroup;
+			children = (
+				77DF7D58B9E9D7267DA7E724 /* DropboxAuthService.swift */,
+				4A8A55026FA8F44D3F914F74 /* DropboxCredentials.swift */,
+			);
+			path = "Auth";
+			sourceTree = "<group>";
+		};
+		5C89BFADBE7A62271469DC12 /* Backup */ = {
+			isa = PBXGroup;
+			children = (
+				7497119E0CB6E7B71B0C2793 /* BackupCoordinator.swift */,
+				93B5A1E526DE0BB55141D7AE /* BackupItem.swift */,
+				6AD7FC9F7DEA0267BE45DB51 /* LocalFileRemover.swift */,
+			);
+			path = "Backup";
+			sourceTree = "<group>";
+		};
+		B051D1DED4E886D83A3FA5BC /* Classification */ = {
+			isa = PBXGroup;
+			children = (
+				76505C2A7937A0B666C2CCE4 /* FileCategory.swift */,
+			);
+			path = "Classification";
+			sourceTree = "<group>";
+		};
+		6A84B771117995B310523560 /* Config */ = {
+			isa = PBXGroup;
+			children = (
+				D9F6F4CC09663E43F23B1D09 /* AppConfig.swift */,
+				35A0AF27CAFF34AE55DC21A0 /* DropboxConfig.example.plist */,
+			);
+			path = "Config";
+			sourceTree = "<group>";
+		};
+		A79D3125DA9D031A87D30B5E /* Demo */ = {
+			isa = PBXGroup;
+			children = (
+				ABA740EE732961A62CAE1F91 /* DemoContent.swift */,
+			);
+			path = "Demo";
+			sourceTree = "<group>";
+		};
+		367F763E09F40EEEA27323CF /* Networking */ = {
+			isa = PBXGroup;
+			children = (
+				BA33042C49A5B552491C310D /* DropboxAPIClient.swift */,
+				6345DDC418D11FBB5F77271B /* DropboxError.swift */,
+				610CC494EEFDE041F37D7DE6 /* UploadProgressDelegate.swift */,
+			);
+			path = "Networking";
+			sourceTree = "<group>";
+		};
+		DD8E90A4851C5485947FA534 /* Resources */ = {
+			isa = PBXGroup;
+			children = (
+				A429B695B07084FD5AFE9EB9 /* Info.plist */,
+				BB43B0DE4DC48A6D97D46BF4 /* MacBackup.entitlements */,
+			);
+			path = "Resources";
+			sourceTree = "<group>";
+		};
+		2AADD817EAA12D9CA2660E3E /* Scanning */ = {
+			isa = PBXGroup;
+			children = (
+				F53F3CF6BFF2F0A4852F4BD6 /* DiskSpace.swift */,
+				AE41505CBC1872E248C8DB5F /* ScanResult.swift */,
+				A99EBC401F4EC92B10A791E3 /* StorageScanViewModel.swift */,
+				A94B9839085FD1FB7C820045 /* StorageScanner.swift */,
+			);
+			path = "Scanning";
+			sourceTree = "<group>";
+		};
+		CA98E1D3BCB4542D3729236D /* Security */ = {
+			isa = PBXGroup;
+			children = (
+				9908910980FFB77907C93650 /* KeychainStore.swift */,
+			);
+			path = "Security";
+			sourceTree = "<group>";
+		};
+		3E2A3017B8357B7785F8D2E8 /* Views */ = {
+			isa = PBXGroup;
+			children = (
+				664F00C1BD13FC487EDE638B /* BackupResultsView.swift */,
+				0848A4C24B0B7FB789CD2EDD /* BackupView.swift */,
+				50853FCD4BD2AAD1895E9A9C /* ByteFormatting.swift */,
+				8F5B2DA3E04FCB76F07363CE /* CategoryBreakdownList.swift */,
+				C7C1391615510282CBD1ADE2 /* ContentView.swift */,
+				ACE87FDC95DAE992E02D4CAF /* DeletionConfirmationView.swift */,
+				F4A134566491AA9D0B57F345 /* DesignSystem.swift */,
+				FD770AB7737A98F4B389D04A /* FileCategory+Chart.swift */,
+				D6F4E957247B306AE281FD1A /* FilePicker.swift */,
+				D2AAFE2AB2B1BE68561C0ED9 /* RadialGauge.swift */,
+				AAC6525AC7C4ED5DDFCDBCF2 /* SettingsView.swift */,
+				355344D4A2715D9FC7154D0E /* StorageScanView.swift */,
+				2E26ED12C0E5FB04E7FE0872 /* UploadProgressView.swift */,
+			);
+			path = "Views";
+			sourceTree = "<group>";
+		};
+		ECAC025C821625377FF8A023 = {
+			isa = PBXGroup;
+			children = (
+				60E67A0B292757537D5BA244 /* MacBackup */,
+				08E6EFA53DDAC9B63DAB9836 /* Products */,
+			);
+			sourceTree = "<group>";
+		};
+		08E6EFA53DDAC9B63DAB9836 /* Products */ = {
+			isa = PBXGroup;
+			children = (
+				F5BF48AA40CAD7891EB709FC /* MacBackup.app */,
+			);
+			name = Products;
+			sourceTree = "<group>";
+		};
+/* End PBXGroup section */
+
+/* Begin PBXNativeTarget section */
+		42AEFBAE01D2DFD981F7DA7D /* MacBackup */ = {
+			isa = PBXNativeTarget;
+			buildConfigurationList = 88A9556C78F4D881C352E222 /* Build configuration list for PBXNativeTarget "MacBackup" */;
+			buildPhases = (
+				F2AB5FB218DA8B84623F4557 /* Sources */,
+				4F6F5CC3FCCF73F75AE9CCF4 /* Frameworks */,
+				55B558C7EF820E6E00E5993B /* Resources */,
+			);
+			buildRules = (
+			);
+			dependencies = (
+			);
+			name = "MacBackup";
+			productName = "MacBackup";
+			productReference = F5BF48AA40CAD7891EB709FC /* MacBackup.app */;
+			productType = "com.apple.product-type.application";
+		};
+/* End PBXNativeTarget section */
+
+/* Begin PBXProject section */
+		46F86FAA6BBF9AC94A7E4595 /* Project object */ = {
+			isa = PBXProject;
+			attributes = {
+				BuildIndependentTargetsInParallel = 1;
+				LastSwiftUpdateCheck = 1500;
+				LastUpgradeCheck = 1500;
+				TargetAttributes = {
+					42AEFBAE01D2DFD981F7DA7D = {
+						CreatedOnToolsVersion = 15.0;
+					};
+				};
+			};
+			buildConfigurationList = 887D4B5F61EA6AAAF609F3AC /* Build configuration list for PBXProject "MacBackup" */;
+			compatibilityVersion = "Xcode 14.0";
+			developmentRegion = ja;
+			hasScannedForEncodings = 0;
+			knownRegions = (
+				ja,
+				en,
+				Base,
+			);
+			mainGroup = ECAC025C821625377FF8A023;
+			productRefGroup = 08E6EFA53DDAC9B63DAB9836 /* Products */;
+			projectDirPath = "";
+			projectRoot = "";
+			targets = (
+				42AEFBAE01D2DFD981F7DA7D /* MacBackup */,
+			);
+		};
+/* End PBXProject section */
+
+/* Begin PBXResourcesBuildPhase section */
+		55B558C7EF820E6E00E5993B /* Resources */ = {
+			isa = PBXResourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+/* End PBXResourcesBuildPhase section */
+
+/* Begin PBXSourcesBuildPhase section */
+		F2AB5FB218DA8B84623F4557 /* Sources */ = {
+			isa = PBXSourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				342BADB1E6A6C532A7613CA9 /* MacBackupApp.swift in Sources */,
+				E530B2113935407D310EB14E /* DropboxAuthService.swift in Sources */,
+				4FB3EE4430134380084C67DA /* DropboxCredentials.swift in Sources */,
+				44675F8D893796F22E20C7C7 /* BackupCoordinator.swift in Sources */,
+				41DC20D6F6BA40E0FBE83C46 /* BackupItem.swift in Sources */,
+				65F45D5C36AA4D7A4E8FF80B /* LocalFileRemover.swift in Sources */,
+				3F6BF860DDAFBE276BD8E282 /* FileCategory.swift in Sources */,
+				7B52110E4A6B690AD1FF5A07 /* AppConfig.swift in Sources */,
+				984CCBBEC64012BE2851A2C1 /* DemoContent.swift in Sources */,
+				F7517DD9CCD4214AE946F5C9 /* DropboxAPIClient.swift in Sources */,
+				A586E4A0285FE39AF3FD8858 /* DropboxError.swift in Sources */,
+				26074D42C97878177FBB2117 /* UploadProgressDelegate.swift in Sources */,
+				6E2D9D4C8B820B8B3243079D /* DiskSpace.swift in Sources */,
+				6C9419BE6BF27E464F1667A9 /* ScanResult.swift in Sources */,
+				AB89B7693878BC49983DCF92 /* StorageScanViewModel.swift in Sources */,
+				4CBCD900A36C8F00AE978AB1 /* StorageScanner.swift in Sources */,
+				5E4E773A35A2BAA5AD8953B7 /* KeychainStore.swift in Sources */,
+				4F3F872290E75E368EA3D44A /* BackupResultsView.swift in Sources */,
+				035016D416E0EB6D1535A9FB /* BackupView.swift in Sources */,
+				70B393AB1CE552B1BBFCEA3A /* ByteFormatting.swift in Sources */,
+				A2AB914B2E0FF0AF3AF64580 /* CategoryBreakdownList.swift in Sources */,
+				8C60E728961A6403EA763106 /* ContentView.swift in Sources */,
+				7D5CFBFC199A2868E8EACF84 /* DeletionConfirmationView.swift in Sources */,
+				B504DE67B54E4FF12DE3E59E /* DesignSystem.swift in Sources */,
+				DB5D0C1CC70B039D1B2E96FA /* FileCategory+Chart.swift in Sources */,
+				FB5A820F158A2D7DE185A040 /* FilePicker.swift in Sources */,
+				C9F4999713BA52B57B235022 /* RadialGauge.swift in Sources */,
+				AB28432DB78DFCAB50F562E1 /* SettingsView.swift in Sources */,
+				F144EECFE0ACB19DA0894DF7 /* StorageScanView.swift in Sources */,
+				241FA7EDF9F692F7AE1D8986 /* UploadProgressView.swift in Sources */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+/* End PBXSourcesBuildPhase section */
+
+/* Begin XCBuildConfiguration section */
+		A1FEF218C4C57CE118AD5A8A /* Debug */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				ALWAYS_SEARCH_USER_PATHS = NO;
+				CLANG_ENABLE_OBJC_WEAK = YES;
+				COPY_PHASE_STRIP = NO;
+				ENABLE_STRICT_OBJC_MSGSEND = YES;
+				GCC_NO_COMMON_BLOCKS = YES;
+				MACOSX_DEPLOYMENT_TARGET = 13.0;
+				SDKROOT = macosx;
+				SWIFT_VERSION = 5.9;
+				DEBUG_INFORMATION_FORMAT = dwarf;
+				ENABLE_TESTABILITY = YES;
+				GCC_OPTIMIZATION_LEVEL = 0;
+				GCC_PREPROCESSOR_DEFINITIONS = ("DEBUG=1", "$(inherited)");
+				MTL_ENABLE_DEBUG_INFO = INCLUDE_SOURCE;
+				ONLY_ACTIVE_ARCH = YES;
+				SWIFT_ACTIVE_COMPILATION_CONDITIONS = "DEBUG $(inherited)";
+				SWIFT_OPTIMIZATION_LEVEL = "-Onone";
+			};
+			name = Debug;
+		};
+		D49EF4AC7029FD1A8C1140E0 /* Release */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				ALWAYS_SEARCH_USER_PATHS = NO;
+				CLANG_ENABLE_OBJC_WEAK = YES;
+				COPY_PHASE_STRIP = NO;
+				ENABLE_STRICT_OBJC_MSGSEND = YES;
+				GCC_NO_COMMON_BLOCKS = YES;
+				MACOSX_DEPLOYMENT_TARGET = 13.0;
+				SDKROOT = macosx;
+				SWIFT_VERSION = 5.9;
+				DEBUG_INFORMATION_FORMAT = "dwarf-with-dsym";
+				ENABLE_NS_ASSERTIONS = NO;
+				MTL_ENABLE_DEBUG_INFO = NO;
+				SWIFT_COMPILATION_MODE = wholemodule;
+				SWIFT_OPTIMIZATION_LEVEL = "-O";
+			};
+			name = Release;
+		};
+		FEE7AE1A1C8291DDE6965C1D /* Debug */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
+				CODE_SIGN_ENTITLEMENTS = MacBackup/Resources/MacBackup.entitlements;
+				CODE_SIGN_STYLE = Automatic;
+				COMBINE_HIDPI_IMAGES = YES;
+				CURRENT_PROJECT_VERSION = 1;
+				ENABLE_HARDENED_RUNTIME = YES;
+				GENERATE_INFOPLIST_FILE = NO;
+				INFOPLIST_FILE = MacBackup/Resources/Info.plist;
+				LD_RUNPATH_SEARCH_PATHS = ("$(inherited)", "@executable_path/../Frameworks");
+				MARKETING_VERSION = 0.1.0;
+				PRODUCT_BUNDLE_IDENTIFIER = com.example.MacBackup;
+				PRODUCT_NAME = "$(TARGET_NAME)";
+				SWIFT_EMIT_LOC_STRINGS = YES;
+			};
+			name = Debug;
+		};
+		71B50D198E64EEE00C2C0E9C /* Release */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
+				CODE_SIGN_ENTITLEMENTS = MacBackup/Resources/MacBackup.entitlements;
+				CODE_SIGN_STYLE = Automatic;
+				COMBINE_HIDPI_IMAGES = YES;
+				CURRENT_PROJECT_VERSION = 1;
+				ENABLE_HARDENED_RUNTIME = YES;
+				GENERATE_INFOPLIST_FILE = NO;
+				INFOPLIST_FILE = MacBackup/Resources/Info.plist;
+				LD_RUNPATH_SEARCH_PATHS = ("$(inherited)", "@executable_path/../Frameworks");
+				MARKETING_VERSION = 0.1.0;
+				PRODUCT_BUNDLE_IDENTIFIER = com.example.MacBackup;
+				PRODUCT_NAME = "$(TARGET_NAME)";
+				SWIFT_EMIT_LOC_STRINGS = YES;
+			};
+			name = Release;
+		};
+/* End XCBuildConfiguration section */
+
+/* Begin XCConfigurationList section */
+		887D4B5F61EA6AAAF609F3AC /* Build configuration list for PBXProject "MacBackup" */ = {
+			isa = XCConfigurationList;
+			buildConfigurations = (
+				A1FEF218C4C57CE118AD5A8A /* Debug */,
+				D49EF4AC7029FD1A8C1140E0 /* Release */,
+			);
+			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Release;
+		};
+		88A9556C78F4D881C352E222 /* Build configuration list for PBXNativeTarget "MacBackup" */ = {
+			isa = XCConfigurationList;
+			buildConfigurations = (
+				FEE7AE1A1C8291DDE6965C1D /* Debug */,
+				71B50D198E64EEE00C2C0E9C /* Release */,
+			);
+			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Release;
+		};
+/* End XCConfigurationList section */
+	};
+	rootObject = 46F86FAA6BBF9AC94A7E4595 /* Project object */;
+}
